@@ -1,6 +1,6 @@
 # 배포
 
-이 프로젝트는 Vite 정적 빌드와 hash 기반 주소를 사용합니다. 서버 기능은 필요하지 않으며, `dist/`를 비공개 S3 버킷에 저장하고 CloudFront OAC로 제공하는 구성을 사용합니다. 이 문서는 배포 준비 과정에서 작성했으며 AWS 리소스, DNS 및 GitHub 저장소는 아직 연결되지 않았습니다.
+이 프로젝트는 Vite 정적 빌드와 hash 기반 주소를 사용합니다. 서버 기능은 필요하지 않으며, `dist/`를 비공개 S3 버킷에 저장하고 CloudFront OAC로 제공하는 구성을 사용합니다. GitHub Actions의 AWS 인증 역할과 파일 배포는 아직 완료되지 않았습니다.
 
 ## GitHub Actions
 
@@ -38,4 +38,12 @@ IAM 역할의 신뢰 정책은 GitHub OIDC 공급자, 대상 저장소와 `refs/
 | TXT | `_dmarc` | `v=DMARC1; p=none;` | 3600 |
 | MX | `@` | `receive-apne1.forge.rmta.net.` | 3600 / 10 |
 
-AWS 계정은 S3와 CloudFront에 접근할 때 계정 설정 완료 안내로 이동합니다. 리소스 ID, 인증서, DNS 변경 및 확인 결과는 실제 설정 후 이 문서에 추가합니다. 현재 원고는 예시 콘텐츠이며 `noindex, nofollow` 설정이 적용되어 있습니다.
+2026-10-28에 다음 구성을 추가했습니다. 기존 가비아 네임서버는 유지했습니다.
+
+- 비공개 S3 버킷: `pitchside-web-61e9824c` (`ap-northeast-2`), 퍼블릭 액세스 차단 및 배포에 한정된 CloudFront OAC 정책 적용.
+- CloudFront: `E1ISGGRNH4XOUN`, `d1d9pg7ythv8pv.cloudfront.net`, 무료 플랜, 기본 객체 `index.html`, HTTP에서 HTTPS로 리디렉션.
+- ACM (`us-east-1`): `www.pitchside.kr` 인증서 `212735ec-0806-4362-8430-49f93fc4e21a` 발급 완료.
+- 가비아에 CNAME `www` → `d1d9pg7ythv8pv.cloudfront.net.` 및 인증서 검증용 CNAME을 추가했습니다. 검증 레코드는 인증서 자동 갱신을 위해 유지합니다.
+- IAM 관리형 정책 `PitchsideWebsiteDeployment`는 버킷 목록·객체 업로드와 위 배포의 무효화 생성 권한만 정의하며, 아직 역할에 연결되지 않았습니다.
+
+현재 원고는 예시 콘텐츠이며 `noindex, nofollow` 설정이 적용되어 있습니다.
