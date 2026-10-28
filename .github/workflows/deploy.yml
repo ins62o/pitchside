@@ -1,0 +1,58 @@
+name: Deploy website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+      AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+      S3_BUCKET: ${{ vars.S3_BUCKET }}
+      CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}
+    steps:
+      - name: Check configuration
+        run: |
+          for name in AWS_REGION AWS_ACCOUNT_ID AWS_ROLE_ARN S3_BUCKET CLOUDFRONT_DISTRIBUTION_ID; do
+            if [ -z "${!name}" ]; then
+              echo "Missing repository variable: $name" >&2
+              exit 1
+            fi
+          done
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ env.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          allowed-account-ids: ${{ env.AWS_ACCOUNT_ID }}
+      - name: Upload assets and entry point
+        run: |
+          aws s3 sync dist/ "s3://$S3_BUCKET/" --exclude 'index.html' --cache-control 'public,max-age=300'
+          aws s3 cp dist/index.html "s3://$S3_BUCKET/index.html" --cache-control 'no-cache'
+      - name: Invalidate CloudFront cache
+        run: aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths '/*'
