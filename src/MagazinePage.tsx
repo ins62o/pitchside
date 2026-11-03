@@ -1,94 +1,97 @@
 import { useState } from 'react'
 import type { ReactNode, RefObject } from 'react'
-import { Badge, Text } from '@seed-design/react'
-import { ActionButton } from 'seed-design/ui/action-button'
-import { readerArticles } from './reader-data'
-import { ArticleCategory, ArticleByline } from './ArticleMeta'
+import type { ReaderArticle } from './reader-data'
+import { parseMagazineText } from './magazine-text'
+import QuoteShare from './QuoteShare'
 import './MagazinePage.css'
 
 const photos = {
-  cover: { src: '/images/magazine-cover.png', alt: '저녁 경기장의 관중석에서 초록색 머플러를 들어 올린 축구 팬의 뒷모습' },
-  objects: { src: '/images/magazine-objects.png', alt: '경기장 좌석 위에 놓인 머플러와 유니폼, 티켓 두 장' },
+  cover: { src: '/images/magazine-cover.png', alt: '관중석에서 초록색 머플러를 들어 올린 축구 팬의 뒷모습' },
+  objects: { src: '/images/magazine-objects.png', alt: '경기장 좌석 위의 머플러와 유니폼, 티켓 두 장' },
   stadium: { src: '/images/stadium.png', alt: '조명이 켜진 축구장과 저녁 하늘' },
   fans: { src: '/images/fans.png', alt: '같은 방향을 바라보며 응원하는 축구 팬들' },
 }
 type Photo = typeof photos.cover
-const gallery = [
-  { photo: photos.fans, caption: '함께 부르는 응원가' },
-  { photo: photos.objects, caption: '경기장에 가져가는 것들' },
-  { photo: photos.stadium, caption: '조명이 켜지는 시간' },
-  { photo: photos.cover, caption: '우리의 토요일' },
+const features = [
+  { id: 'saturday', title: '우리의 토요일', subtitle: '축구를 좋아하는 마음에 관하여', photo: photos.cover, wide: photos.fans, label: 'FAN CULTURE' },
+  { id: 'away-end', title: '어디든, 함께', subtitle: '90분보다 긴 원정의 기록', photo: photos.fans, wide: photos.cover, label: 'AWAY DAYS' },
+  { id: 'before-kickoff', title: '킥오프 전의 시간', subtitle: '경기장으로 향하는 마음', photo: photos.objects, wide: photos.stadium, label: 'MATCHDAY' },
+  { id: 'our-town', title: '우리 동네의 축구', subtitle: '유니폼을 입고 자라는 동네', photo: photos.stadium, wide: photos.fans, label: 'LOCAL FOOTBALL' },
+  { id: 'after-whistle', title: '휘슬이 울린 뒤', subtitle: '끝나지 않은 경기장의 이야기', photo: photos.fans, wide: photos.stadium, label: 'AFTER THE GAME' },
 ]
-const features = readerArticles.filter(article => ['saturday', 'away-end', 'after-whistle'].includes(article.id))
-const chapters = [
-  { title: '경기장에 가는 날', text: '익숙한 길도 경기 날에는 조금 다르다. 킥오프 전부터 시작되는 우리의 주말.', id: 'before-kickoff' },
-  { title: '어디든, 함께', text: '낯선 도시에서도 같은 노래를 부르는 사람들. 원정석에서 이어지는 이야기.', id: 'away-end' },
-  { title: '축구 곁의 사람들', text: '그라운드 안팎에서 만나는 각자의 축구. 한 사람의 목소리로 들여다본 하루.', id: 'midfielder' },
-  { title: '우리만의 주말', text: '머플러 하나, 유니폼 한 벌, 오래 부른 응원가. 축구가 일상이 되는 순간.', id: 'saturday' },
-  { title: '휘슬이 울린 뒤', text: '경기는 끝나도 이야기는 남는다. 그날의 표정과 기억을 한 장씩 모은다.', id: 'after-whistle' },
-]
+const magazineUrl = (id: string) => `#/magazine/${id}`
 
-function jumpTo(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })
-}
-
-function MagazinePhoto({ photo, portrait = false, eager = false }: { photo: Photo; portrait?: boolean; eager?: boolean }) {
+function MagazinePhoto({ photo, eager = false }: { photo: Photo; eager?: boolean }) {
   const [failed, setFailed] = useState(false)
-  return <div className="mag-photo">{failed ? <span className="mag-photo-placeholder" role="img" aria-label="사진 준비 중">pitchside.</span> : <><img src={photo.src} alt={photo.alt} width={portrait ? 1024 : 1536} height={portrait ? 1536 : 1024} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : 'auto'} onError={() => setFailed(true)} /><span className="photo-watermark" aria-hidden="true">pitchside.</span></>}</div>
+  return <div className="mag-photo">{failed ? <span className="mag-photo-placeholder" role="img" aria-label="사진 준비 중">pitchside.</span> : <><img src={photo.src} alt={photo.alt} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : 'auto'} onError={() => setFailed(true)} /><span className="photo-watermark" aria-hidden="true">pitchside.</span></>}</div>
 }
 
-export default function MagazinePage({ mainRef, themeControl }: { mainRef: RefObject<HTMLElement | null>; themeControl: ReactNode }) {
+function MagazineNav({ themeControl, about = false }: { themeControl: ReactNode; about?: boolean }) {
+  return <header className="mag-header">
+    <nav className="mag-nav" aria-label="팬 매거진 메뉴"><a href="#/">← 기사 홈</a><a href="#/magazine" className="mag-nav-center">FAN MAGAZINE</a><div><a href="#/magazine/about" aria-current={about ? 'page' : undefined}>매거진 소개</a>{themeControl}</div></nav>
+    <a href="#/magazine" className="mag-masthead" aria-label="Pitchside 매거진 홈">PITCHSIDE<span>경기장 바깥에도, 축구는 있다.</span></a>
+  </header>
+}
+
+function MagazineFooter() {
+  return <footer className="mag-footer"><a href="#/magazine" className="mag-footer-brand">PITCHSIDE</a><p>축구를 좋아하는 우리의 삶을 기록합니다.</p><div><a href="#/">기사 홈으로 ↗</a><small>© 2026 Pitchside</small></div></footer>
+}
+
+function MagazineHome() {
+  const [active, setActive] = useState(0)
+  const feature = features[active]
+  return <>
+    <section className="mag-cover-section" aria-label="매거진 특집">
+      <a className="mag-cover" href={magazineUrl(feature.id)} aria-label={`${feature.title} 특집 읽기`}>
+        <MagazinePhoto key={feature.id} photo={feature.wide} eager />
+        <div className="mag-cover-shade" />
+        <div className="mag-cover-copy"><p>{feature.subtitle}</p><h1>{feature.title}</h1><span>이야기 펼쳐보기 <span aria-hidden="true">↗</span></span></div>
+      </a>
+      <div className="mag-cover-controls"><p>피치사이드 팬 매거진 <span>2026 · 가을호</span></p><div aria-label="특집 선택" role="group">{features.slice(0, 3).map((item, index) => <button key={item.id} type="button" aria-label={`${item.title} 표지 보기`} aria-pressed={active === index} onClick={() => setActive(index)}>{String(index + 1).padStart(2, '0')}</button>)}</div></div>
+    </section>
+    <section className="mag-issues" id="mag-stories" aria-labelledby="mag-stories-heading">
+      <div className="mag-section-heading"><h2 id="mag-stories-heading">이번 호에 담은 이야기</h2><p>경기장으로 향하는 마음부터, 집으로 돌아오는 길까지.</p></div>
+      <div className="mag-issue-grid">{features.slice(1).map((item, index) => <article className="mag-issue" key={item.id}><a href={magazineUrl(item.id)} aria-labelledby={`mag-issue-${item.id}`}><div className="mag-issue-cover"><MagazinePhoto photo={item.photo} /><div className="mag-issue-shade" /><div className="mag-issue-print" aria-hidden="true"><span>PITCHSIDE</span><strong>{item.title}</strong><small>{item.label}</small></div></div><div className="mag-issue-caption"><span>0{index + 2}</span><div><h3 id={`mag-issue-${item.id}`}>{item.title}</h3><p>{item.subtitle}</p></div><span aria-hidden="true">↗</span></div></a></article>)}</div>
+    </section>
+    <section className="mag-editor-note"><p>FROM THE EDITORS</p><h2>우리가 좋아하는 건,<br />축구만은 아닐지도.</h2><div><p>첫 유니폼을 입던 날, 원정 버스에서 만난 사람,<br className="mag-desktop-break" /> 목이 쉬도록 부른 응원가. 승패만으로는 다 담을 수 없는<br className="mag-desktop-break" /> 우리의 축구를 한 장씩 기록합니다.</p><a href="#/magazine/about">피치사이드 매거진에 관하여 ↗</a></div></section>
+  </>
+}
+
+function MagazineText({ text }: { text: string }) {
+  return <>{parseMagazineText(text).map((part, index) => part.style === 'bold' ? <strong key={index}>{part.text}</strong> : part.style === 'underline' ? <u key={index}>{part.text}</u> : part.text)}</>
+}
+
+function MagazineDetail({ article }: { article: ReaderArticle }) {
+  const feature = features.find(item => item.id === article.id)
+  const [cover, wide] = feature ? [feature.photo, feature.wide] : [photos.cover, photos.stadium]
+  const quote = article.body.find(section => section.quote)?.quote
+  const source = { title: feature?.title ?? article.title, author: article.author, date: article.date, quote: quote?.text ?? article.summary }
+  return <article className="mag-detail">
+    <header className="mag-detail-heading"><a href="#/magazine">매거진으로 돌아가기</a><p>{feature?.subtitle ?? article.kind}</p><h1>{feature?.title ?? article.title}</h1><div>{article.author} 기자 <span>·</span> {article.date.replaceAll('-', '.')}</div></header>
+    <figure className="mag-detail-hero"><MagazinePhoto photo={wide} eager /><figcaption>{article.image?.caption}</figcaption></figure>
+    <QuoteShare source={source}>
+      <div className="mag-detail-intro"><p>{article.summary}</p><span aria-hidden="true">✳</span></div>
+      <div className="mag-body">{article.body.map((section, index) => <section key={index}>
+        {section.heading && <h2>{section.heading}</h2>}
+        {section.paragraphs.map((paragraph, paragraphIndex) => <p key={paragraphIndex}><MagazineText text={index === 0 && paragraphIndex === 0 ? `**${paragraph}**` : paragraph} /></p>)}
+        {section.quote && <blockquote><p><u>{section.quote.text}</u></p><cite>{section.quote.speaker}</cite></blockquote>}
+        {index === 1 && <figure className="mag-inline-image"><MagazinePhoto photo={cover} /><figcaption>관중석 안팎에서 이어지는 우리의 축구.</figcaption></figure>}
+      </section>)}</div>
+    </QuoteShare>
+    <div className="mag-detail-end"><p>{article.author} 기자</p><a href="#/magazine">다른 이야기 펼쳐보기 ↗</a></div>
+    <aside className="mag-next-story"><p>함께 읽는 이야기</p><a href={magazineUrl(features.find(item => item.id !== article.id)!.id)}>{features.find(item => item.id !== article.id)!.title}<span aria-hidden="true">↗</span></a></aside>
+  </article>
+}
+
+function MagazineAbout() {
+  return <article className="mag-about"><header><p>ABOUT PITCHSIDE</p><h1>축구를 좋아하는<br />우리의 삶을 기록합니다.</h1></header><MagazinePhoto photo={photos.fans} eager /><div className="mag-about-body"><p>승패만으로는 다 담을 수 없는 축구가 있습니다. 첫 유니폼을 입던 날, 원정 버스에서 만난 사람, 목이 쉬도록 부른 응원가.</p><p>피치사이드 팬 매거진은 경기장 곁에서 만나는 사람들의 이야기를 모은 지면입니다. 축구를 좋아하는 우리의 시선으로 그라운드 바깥의 시간을 바라봅니다.</p><h2>경기장 가까이, 사람들 곁에서.</h2><p>멀리서 평가하기보다 곁에서 바라봅니다. 응원하는 팀이 달라도 같은 토요일을 보내는 사람들의 이야기를 나란히 놓습니다.</p><a href="#/magazine">이번 호 읽으러 가기 ↗</a></div></article>
+}
+
+export default function MagazinePage({ page, article, mainRef, themeControl }: { page: 'home' | 'about' | 'detail'; article?: ReaderArticle; mainRef: RefObject<HTMLElement | null>; themeControl: ReactNode }) {
   return <div className="magazine">
     <a className="skip-link" href="#magazine-content" onClick={event => { event.preventDefault(); mainRef.current?.focus() }}>본문으로 바로가기</a>
-    <header className="mag-nav">
-      <div className="mag-nav-inner">
-        <a className="wordmark" href="#/" aria-label="Pitchside 홈">pitchside<span aria-hidden="true">.</span></a>
-        {themeControl}
-        <nav aria-label="팬 매거진 메뉴">
-          <ActionButton variant="ghost" size="small" type="button" onClick={() => jumpTo('mag-about')}>매거진 소개</ActionButton>
-          <ActionButton variant="ghost" size="small" type="button" onClick={() => jumpTo('mag-stories')}>이번 호</ActionButton>
-          <ActionButton variant="ghost" size="small" type="button" onClick={() => jumpTo('mag-scenes')}>팬의 장면</ActionButton>
-          <ActionButton asChild variant="brandOutline" size="medium"><a href="#/">기사 홈 <span aria-hidden="true">↗</span></a></ActionButton>
-        </nav>
-      </div>
-    </header>
-    <main className="mag-container" id="magazine-content" ref={mainRef} tabIndex={-1}>
-      <section className="mag-hero" aria-labelledby="mag-title">
-        <div className="mag-hero-copy">
-          <Badge.Root variant="outline" tone="brand" size="large"><Badge.Label>팬 매거진 · 2026년 10월호</Badge.Label></Badge.Root>
-          <h1 id="mag-title">축구가 끝나도,<br />우리의 이야기는<br className="mag-title-break" /> 계속된다.</h1>
-          <p>90분 바깥의 축구.<br />경기장으로 향하는 마음과 그곳에 남은 우리의 이야기.</p>
-          <ActionButton className="mag-primary-action" variant="brandSolid" size="large" type="button" onClick={() => jumpTo('mag-stories')}>이번 호 펼쳐보기 <span aria-hidden="true">↗</span></ActionButton>
-        </div>
-        <figure className="mag-cover"><MagazinePhoto photo={photos.cover} portrait eager /><figcaption>경기장 곁에서 만나는, 축구를 좋아하는 우리의 모습.</figcaption></figure>
-      </section>
-
-      <section className="mag-scenes" id="mag-scenes" aria-labelledby="mag-scenes-heading">
-        <div className="mag-section-heading"><Text as="h2" textStyle="t9Bold" id="mag-scenes-heading">팬의 장면</Text></div>
-        <div className="mag-gallery">{gallery.map(({ photo, caption }) => <figure key={photo.src}><MagazinePhoto photo={photo} portrait={photo === photos.cover} /><figcaption>{caption}</figcaption></figure>)}</div>
-      </section>
-
-      <section className="mag-about" id="mag-about" aria-labelledby="mag-about-heading">
-        <div><Text as="h2" textStyle="t9Bold" id="mag-about-heading">축구를 좋아하는 우리의 삶을 기록합니다.</Text><p>승패만으로는 다 담을 수 없는 축구가 있습니다. 첫 유니폼을 입던 날, 원정 버스에서 만난 사람, 목이 쉬도록 부른 응원가. 피치사이드 팬 매거진은 축구를 좋아하는 우리의 삶을 기록합니다.</p></div>
-        <ActionButton variant="neutralWeak" size="medium" type="button" onClick={() => jumpTo('mag-chapters')}>우리가 담는 이야기 <span aria-hidden="true">↓</span></ActionButton>
-      </section>
-
-      <section className="mag-chapters" id="mag-chapters" aria-labelledby="mag-chapters-heading">
-        <div className="mag-section-heading"><Text as="h2" textStyle="t9Bold" id="mag-chapters-heading">다섯 가지 시선</Text></div>
-        <div className="mag-chapter-list">{chapters.map((chapter, index) => <a href={`#/articles/${chapter.id}?from=%2Fmagazine`} className="mag-chapter" key={chapter.id}><span className="mag-chapter-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span><div><h3>{chapter.title}</h3><p>{chapter.text}</p></div><span className="mag-chapter-arrow" aria-hidden="true">↗</span></a>)}</div>
-      </section>
-
-      <section className="mag-stories" id="mag-stories" aria-labelledby="mag-stories-heading">
-        <div className="mag-section-heading"><Text as="h2" textStyle="t9Bold" id="mag-stories-heading">이번 호 이야기</Text><span>2026년 10월 · 창간호</span></div>
-        <div className="mag-features">{features.map(article => <article className="mag-feature" key={article.id}>
-          <a href={`#/articles/${article.id}?from=%2Fmagazine`} aria-labelledby={`mag-story-${article.id}`}>
-            <MagazinePhoto photo={article.image || photos.stadium} />
-            <div className="mag-feature-copy"><ArticleCategory article={article} /><h3 id={`mag-story-${article.id}`}>{article.title}</h3><p>{article.summary}</p><ArticleByline article={article} /><span className="mag-read-link">이야기 읽기 <span aria-hidden="true">↗</span></span></div>
-          </a>
-        </article>)}</div>
-        <div className="mag-endnote"><p>다음 주말에도, 우리는 경기장에서.</p><ActionButton asChild variant="brandOutline" size="medium"><a href="#/articles">더 많은 축구 이야기 <span aria-hidden="true">↗</span></a></ActionButton></div>
-      </section>
-    </main>
-    <footer className="mag-footer"><div><a className="wordmark" href="#/" aria-label="Pitchside 홈">pitchside<span aria-hidden="true">.</span></a><small>© 2026 Pitchside</small></div></footer>
+    <MagazineNav themeControl={themeControl} about={page === 'about'} />
+    <main id="magazine-content" ref={mainRef} tabIndex={-1}>{page === 'home' ? <MagazineHome /> : page === 'about' ? <MagazineAbout /> : article ? <MagazineDetail article={article} /> : <section className="mag-missing"><h1>이야기를 찾을 수 없습니다.</h1><a href="#/magazine">매거진으로 돌아가기 ↗</a></section>}</main>
+    <MagazineFooter />
   </div>
 }

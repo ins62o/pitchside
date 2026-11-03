@@ -6,7 +6,12 @@
 .header-inner { min-height: 88px; display: flex; align-items: center; gap: 24px; }
 .wordmark { display: inline-block; padding-bottom: 4px; font: italic 900 44px/1.15 Arial,sans-serif; letter-spacing: -3px; color: var(--seed-color-fg-brand); }
 .header-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-.header-magazine { gap: 6px; }
+.header-magazine { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 4px 8px 12px; font-size: 15px; font-weight: 550; }
+.header-magazine-label { position: relative; padding-bottom: 3px; line-height: 1.4; white-space: nowrap; }
+.header-magazine-label::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left center; transition: transform 380ms cubic-bezier(.22,1,.36,1); }
+@media (hover: hover) {
+  .header-magazine:hover .header-magazine-label::after { transform: scaleX(1); }
+}
 .primary-nav { padding-bottom: 16px; }
 .nav-inner { display: flex; align-items: center; gap: 8px; }
 .nav-inner a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 20px; border-radius: var(--seed-radius-full); color: var(--muted); font-size: 15px; font-weight: 600; }
@@ -80,16 +85,17 @@
 .not-found { margin-top: 40px; }
 .publication-label { margin-bottom: 12px; color: var(--accent); font-size: 14px; font-weight: 700; }
 .story-page { padding-top: 40px; }
+.story-heading,.story-figure,.story-body { max-width: 700px; margin-inline: auto; }
 .story-heading .article-category { margin-bottom: 16px; }
 .story-heading h1 { font-size: clamp(32px,3.4vw,44px); line-height: 1.4; letter-spacing: -1.2px; font-weight: 700; }
 .story-heading .byline { margin-top: 20px; }
-.story-figure { margin-top: 24px; }
+.story-figure { margin-top: 32px; }
 .story-image { border-radius: var(--seed-radius-r2); }
-.story-figure img,.story-figure .image-placeholder { width: 100%; aspect-ratio: 2.4; object-fit: cover; }
+.story-figure img,.story-figure .image-placeholder { width: 100%; aspect-ratio: 1.85; object-fit: cover; }
 .story-figure figcaption { margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
-.story-body { margin: 32px 0 0; font-size: 18px; line-height: 1.82; letter-spacing: -.1px; overflow-wrap: anywhere; }
-.story-body > section { margin-top: 40px; }
-.story-body > section:first-child { margin-top: 0; }
+.story-body { margin-top: 36px; font-size: 18px; line-height: 1.82; letter-spacing: -.1px; overflow-wrap: anywhere; }
+.story-body .quote-selectable > section { margin-top: 40px; }
+.story-body .quote-selectable > section:first-child { margin-top: 0; }
 .story-body section > p { margin-bottom: 26px; }
 .story-body h2 { margin-bottom: 22px; font-size: 26px; line-height: 1.5; font-weight: 700; letter-spacing: -.6px; }
 .pull-quote { margin-block: 36px; padding: 24px; border-left: 4px solid var(--seed-color-fg-brand); border-radius: 0 var(--seed-radius-r4) var(--seed-radius-r4) 0; background: var(--accent-soft); }

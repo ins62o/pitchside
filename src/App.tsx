@@ -6,6 +6,7 @@ import { ToggleButton } from 'seed-design/ui/toggle-button'
 import { articleKinds, leagues, readerArticles, relatedArticles, selectArticles } from './reader-data'
 import type { ReaderArticle, ReaderFilter } from './reader-data'
 import MagazinePage from './MagazinePage'
+import QuoteShare from './QuoteShare'
 import { ArticleViewSwitch, ThemeToggle } from './ReaderControls'
 import type { ArticleViewProps } from './ReaderControls'
 import { readReaderPreferences, saveReaderPreferences } from './reader-preferences'
@@ -112,10 +113,11 @@ function ArticlePage({ article, params }: { article: ReaderArticle; params: URLS
   const candidate = params.get('from') || ''
   const returnTo = candidate === '/magazine' || candidate === '/articles' || candidate.startsWith('/articles?') ? `#${candidate}` : '#/articles'
   const returnLabel = candidate === '/magazine' ? '팬 매거진' : '기사 목록'
+  const source = { title: article.title, author: article.author, date: article.date, quote: article.body.find(section => section.quote)?.quote?.text ?? article.summary }
   return <article className="story-page">
     <header className="story-heading"><ArticleCategory article={article} /><h1>{article.title}</h1><ArticleByline article={article} readingTime /></header>
     <figure className="story-figure"><div className="story-image"><ArticleImage article={article} eager /></div><figcaption>{article.image?.caption}</figcaption></figure>
-    <div className="story-body">{article.body.map((section, i) => <section key={i}>{section.heading && <h2>{section.heading}</h2>}{section.paragraphs.map((paragraph, j) => <p key={j}>{paragraph}</p>)}{section.quote && <figure className="pull-quote"><blockquote><p>{section.quote.text}</p></blockquote><figcaption>{section.quote.speaker}</figcaption></figure>}</section>)}<div className="story-end"><p>{article.author} 기자</p><a href={returnTo} className="text-link">{returnLabel}으로</a></div></div>
+    <div className="story-body"><QuoteShare source={source}>{article.body.map((section, i) => <section key={i}>{section.heading && <h2>{section.heading}</h2>}{section.paragraphs.map((paragraph, j) => <p key={j}>{paragraph}</p>)}{section.quote && <figure className="pull-quote"><blockquote><p>{section.quote.text}</p></blockquote><figcaption>{section.quote.speaker}</figcaption></figure>}</section>)}</QuoteShare><div className="story-end"><p>{article.author} 기자</p><a href={returnTo} className="text-link">{returnLabel}으로</a></div></div>
     <section className="related-section" aria-labelledby="related-heading"><div className="section-heading"><h2 id="related-heading">이어서 읽는 이야기</h2></div><div className="related-grid">{relatedArticles(article).map(item => <article key={item.id}><ArticleCategory article={item} /><h3><a className="card-link" href={storyUrl(item, returnTo.slice(1))}>{item.title}</a></h3><p>{item.summary}</p><ArticleByline article={item} /></article>)}</div></section>
   </article>
 }
@@ -143,7 +145,8 @@ export default function App() {
   const main = useRef<HTMLElement>(null)
   const [path, search = ''] = route.split('?')
   const params = new URLSearchParams(search)
-  const article = path.startsWith('/articles/') ? readerArticles.find(item => item.id === path.slice(10)) : undefined
+  const articleId = path.startsWith('/articles/') ? path.slice(10) : path.startsWith('/magazine/') ? path.slice(10) : ''
+  const article = readerArticles.find(item => item.id === articleId)
   const archive = path === '/articles'
   const currentLeague = archive ? params.get('league') : article?.league
 
@@ -205,11 +208,11 @@ export default function App() {
     if (description) description.content = article?.summary || 'K리그1과 K리그2의 경기, 사람, 전술을 읽는 Pitchside. 경기장 가까이에서 우리 축구의 이야기를 전합니다.'
   }, [article, archive, path])
 
-  if (path === '/magazine') return <MagazinePage mainRef={main} themeControl={themeControl} />
+  if (path === '/magazine' || path.startsWith('/magazine/') || (article && params.get('from') === '/magazine')) return <MagazinePage key={path} page={path === '/magazine' ? 'home' : path === '/magazine/about' ? 'about' : 'detail'} article={article} mainRef={main} themeControl={themeControl} />
 
   return <div className="pitchside-reader">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); main.current?.focus() }}>본문으로 바로가기</a>
-    <header className="site-header"><div className="header-inner"><Brand /><div className="header-actions">{themeControl}<ActionButton asChild variant="brandOutline" size="medium" className="header-magazine"><a href="#/magazine">팬 매거진<span aria-hidden="true">↗</span></a></ActionButton></div></div><nav className="primary-nav" aria-label="주 메뉴"><div className="nav-inner"><a href="#/" aria-current={path === '/' ? 'page' : undefined}>홈</a><a href={archiveUrl(archive ? { kind: params.get('kind') || '', query: params.get('q') || '' } : {})} aria-current={archive && !currentLeague ? 'page' : undefined}>전체 기사</a>{leagues.map(league => <a key={league} href={archiveUrl({ league, ...(archive ? { kind: params.get('kind') || '', query: params.get('q') || '' } : {}) })} aria-current={currentLeague === league ? 'page' : undefined}>{league}</a>)}</div></nav></header>
+    <header className="site-header"><div className="header-inner"><Brand /><div className="header-actions">{themeControl}<a href="#/magazine" className="header-magazine"><span className="header-magazine-label">Magazine <span aria-hidden="true">↗</span></span></a></div></div><nav className="primary-nav" aria-label="주 메뉴"><div className="nav-inner"><a href="#/" aria-current={path === '/' ? 'page' : undefined}>홈</a><a href={archiveUrl(archive ? { kind: params.get('kind') || '', query: params.get('q') || '' } : {})} aria-current={archive && !currentLeague ? 'page' : undefined}>전체 기사</a>{leagues.map(league => <a key={league} href={archiveUrl({ league, ...(archive ? { kind: params.get('kind') || '', query: params.get('q') || '' } : {}) })} aria-current={currentLeague === league ? 'page' : undefined}>{league}</a>)}</div></nav></header>
     <main className="page-container" id="main-content" ref={main} tabIndex={-1} key={route}>{path === '/' ? <HomePage /> : archive ? <ArchivePage params={params} route={route} {...viewProps} /> : article ? <ArticlePage article={article} params={params} /> : <NotFound />}</main>
     <footer className="site-footer"><div className="footer-inner"><Brand /><p className="footer-copyright">© 2026 Pitchside</p></div></footer>
   </div>
