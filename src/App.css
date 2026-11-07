@@ -13,8 +13,13 @@
   .header-magazine:hover .header-magazine-label::after { transform: scaleX(1); }
 }
 .primary-nav { padding-bottom: 16px; }
-.nav-inner { display: flex; align-items: center; gap: 8px; }
-.nav-inner a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 10px 20px; border-radius: var(--seed-radius-full); color: var(--muted); font-size: 15px; font-weight: 600; }
+.nav-inner { display: flex; align-items: center; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.nav-inner::-webkit-scrollbar { display: none; }
+/* 좁은 화면에서 메뉴를 가로로 넘길 때 포커스 테두리가 잘리지 않도록 안쪽에 그린다. */
+.nav-inner a:focus-visible { outline-offset: -2px; }
+.nav-inner a { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; min-height: 44px; padding: 10px 20px; border-radius: var(--seed-radius-full); color: var(--muted); font-size: 15px; font-weight: 600; flex: none; white-space: nowrap; }
+/* 선택된 메뉴가 굵어져도 폭이 바뀌지 않도록 굵은 글자 폭을 미리 확보한다. */
+.nav-inner a::after { content: attr(data-label); height: 0; overflow: hidden; visibility: hidden; font-weight: 700; pointer-events: none; }
 .nav-inner a[aria-current=page] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 .page-container { padding-bottom: 80px; outline: none; }
 .home-heading { padding: 36px 0 24px; }
@@ -34,7 +39,6 @@
 .lead-photo,.front-story-image,.row-image,.story-image { position: relative; overflow: hidden; border-radius: var(--seed-radius-r4); }
 .text-link { display: inline-flex; gap: 10px; align-items: center; min-height: 44px; color: var(--accent); font-size: 14px; font-weight: 600; }
 .latest-section { margin-top: 40px; }
-.results-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
 .section-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding-bottom: 20px; }
 .section-heading > h2 { font-size: 24px; line-height: 1.4; letter-spacing: -.6px; font-weight: 700; }
 .article-rows { padding-inline: 24px; border-radius: var(--card-radius); background: var(--surface); }
@@ -54,30 +58,23 @@
 .card-link:focus-visible { outline: none; }
 .card-link:focus-visible::after { outline: 2px solid var(--seed-color-stroke-brand-solid); outline-offset: 4px; }
 .row-copy > p { color: var(--muted); font-size: 15px; line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere; }
-.archive-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 40px 0 28px; }
-.archive-heading h1 { font-size: 36px; line-height: 1.4; font-weight: 700; letter-spacing: -1px; }
-.archive-heading .search-toggle { flex: none; width: 44px; min-height: 44px; border-radius: var(--seed-radius-full); }
-.archive-heading .search-toggle svg { width: 22px; height: 22px; }
-.archive-heading .search-toggle[aria-expanded=true] { background: var(--accent-soft); }
-.archive-search-panel { display: grid; grid-template-rows: 0fr; opacity: 0; visibility: hidden; transform: translateY(-6px); transition: grid-template-rows 240ms cubic-bezier(.22,1,.36,1), opacity 180ms ease, transform 240ms cubic-bezier(.22,1,.36,1), visibility 0s 240ms; }
-.archive-search-panel[data-open=true] { grid-template-rows: 1fr; opacity: 1; visibility: visible; transform: translateY(0); transition-delay: 0s; }
-.archive-search-clip { min-height: 0; overflow: hidden; }
-.archive-search { padding: 24px; background: var(--surface); border-radius: var(--card-radius); }
-.search-controls { display: flex; flex-wrap: wrap; gap: 8px; }
-.archive-search .search-input { flex: 1 1 240px; width: auto; min-width: 0; min-height: 48px; border: 1px solid var(--seed-color-palette-gray-600); border-radius: var(--seed-radius-r3); background: var(--paper); box-shadow: none; transition: border-color 160ms ease; }
+.archive-heading { display: grid; grid-template-columns: minmax(0,1fr) auto auto; grid-template-areas: 'title search view'; align-items: center; gap: 12px 16px; padding: 40px 0 20px; }
+.archive-heading h1 { grid-area: title; }
+.archive-heading .view-switch { grid-area: view; }
+/* 검색칸은 늘 보이며 목록 카드와 같은 표면색으로 테두리 없이 구분한다. 높이는 보기 전환 묶음(54px)에 맞춘다. */
+.archive-search { grid-area: search; position: relative; width: 320px; }
+.archive-search .search-input { width: 100%; min-height: 54px; padding: 0; border: 0; border-radius: var(--seed-radius-full); background: var(--surface); color: var(--muted); box-shadow: none; }
 .archive-search .search-input::after { content: none; }
-.archive-search .search-input:focus-within { border-color: var(--accent); }
-.search-controls .search-input input { width: 100%; min-width: 0; min-height: 46px; padding: 12px 16px; border: 0; outline: 0; background: transparent; box-shadow: none; font-size: 16px; }
-.search-controls .search-input input::placeholder { font-size: 16px; color: var(--muted); }
-.search-controls .search-submit,.search-controls .clear-search { min-height: 48px; padding-inline: 20px; border-radius: var(--seed-radius-r3); }
-.archive-filters { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; gap: 8px 16px; margin-top: 24px; }
-.kind-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.kind-filters .type-filter { min-height: 44px; padding: 10px 16px; border: 1px solid var(--line); border-radius: var(--seed-radius-full); background: var(--surface); color: var(--muted); font-size: 14px; font-weight: 600; }
-.kind-filters .type-filter[aria-pressed=true] { background: var(--accent-soft); border-color: var(--seed-color-stroke-brand-weak); color: var(--accent); font-weight: 700; }
-.results-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding: 28px 0 18px; }
-.results-heading h2 { font-size: 20px; line-height: 1.6; font-weight: 700; overflow-wrap: anywhere; }
-.results-heading h2 > span { margin-left: 8px; color: var(--muted); font-size: 14px; font-weight: 400; white-space: nowrap; }
-.reset-link { display: inline-flex; align-items: center; min-height: 44px; flex: none; color: var(--accent); font-size: 13px; font-weight: 600; }
+.archive-search .search-input input { width: 100%; min-width: 0; min-height: 54px; padding: 12px 54px; border: 0; outline: 0; background: transparent; box-shadow: none; color: var(--ink); font-size: 15px; }
+.archive-search input::placeholder { color: var(--muted); }
+.archive-search input::-webkit-search-cancel-button { appearance: none; }
+.archive-search :is(.search-submit,.clear-search) { position: absolute; top: 5px; width: 44px; min-height: 44px; border-radius: var(--seed-radius-full); color: var(--muted); }
+.archive-search .search-submit { left: 5px; color: var(--ink); }
+.archive-search .clear-search { right: 5px; }
+.archive-search .search-submit svg { width: 20px; height: 20px; }
+.archive-search .clear-search svg { width: 18px; height: 18px; }
+.archive-heading h1 { font-size: 20px; line-height: 1.6; font-weight: 700; overflow-wrap: anywhere; }
+.archive-heading h1 > span { margin-left: 8px; color: var(--muted); font-size: 14px; font-weight: 400; white-space: nowrap; }
 .no-results,.not-found { padding: 64px 24px; border-radius: var(--card-radius); background: var(--surface); text-align: center; }
 .no-results h2,.not-found h1 { font-size: 28px; line-height: 1.5; font-weight: 700; letter-spacing: -.6px; }
 .no-results p,.not-found > p:not(.publication-label) { margin-top: 12px; color: var(--muted); font-size: 16px; line-height: 1.75; }
@@ -94,8 +91,8 @@
 .story-figure img,.story-figure .image-placeholder { width: 100%; aspect-ratio: 1.85; object-fit: cover; }
 .story-figure figcaption { margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
 .story-body { margin-top: 36px; font-size: 18px; line-height: 1.82; letter-spacing: -.1px; overflow-wrap: anywhere; }
-.story-body .quote-selectable > section { margin-top: 40px; }
-.story-body .quote-selectable > section:first-child { margin-top: 0; }
+.story-body > section { margin-top: 40px; }
+.story-body > section:first-child { margin-top: 0; }
 .story-body section > p { margin-bottom: 26px; }
 .story-body h2 { margin-bottom: 22px; font-size: 26px; line-height: 1.5; font-weight: 700; letter-spacing: -.6px; }
 .pull-quote { margin-block: 36px; padding: 24px; border-left: 4px solid var(--seed-color-fg-brand); border-radius: 0 var(--seed-radius-r4) var(--seed-radius-r4) 0; background: var(--accent-soft); }
@@ -149,8 +146,8 @@
   .header-actions { gap: 4px; }
   .header-magazine { font-size: 13px; padding-inline: 12px; }
   .primary-nav { padding-bottom: 12px; }
-  .nav-inner { gap: 4px; }
-  .nav-inner a { padding: 10px 14px; font-size: 14px; }
+  .nav-inner { gap: 2px; }
+  .nav-inner a { padding: 10px 10px; font-size: 14px; }
   .page-container { padding-bottom: 48px; }
   .home-heading { padding: 28px 0 20px; }
   .home-heading h1 { font-size: 26px; }
@@ -164,7 +161,6 @@
   .front-story-image img,.front-story-image .image-placeholder { aspect-ratio: 1.1; }
   .front-related h3 { margin: 0; padding: 8px 12px 8px 0; font-size: 18px; }
   .latest-section { margin-top: 32px; }
-  .results-actions { width: 100%; justify-content: flex-end; gap: 12px; }
   .article-rows[data-view=gallery] { grid-template-columns: minmax(0,1fr); gap: 20px; }
   .section-heading { gap: 12px; padding-bottom: 16px; }
   .section-heading > h2 { font-size: 22px; }
@@ -179,17 +175,10 @@
   .row-copy > p { font-size: 14px; line-height: 1.7; }
   .image-placeholder > span { font-size: 21px; }
   .image-placeholder small { font-size: 10px; }
-  .archive-heading { gap: 16px; padding: 28px 0 24px; }
-  .archive-heading h1 { font-size: 28px; }
-  .archive-search { padding: 20px 16px; }
-  .search-controls .search-input { flex-basis: 100%; width: 100%; }
-  .search-controls .search-submit,.search-controls .clear-search { flex: 1; padding-inline: 12px; }
-  .archive-filters { align-items: start; gap: 8px; }
-  .archive-filters .reset-link { grid-column: 2; grid-row: 1; justify-self: end; }
-  .kind-filters .type-filter { padding-inline: 14px; font-size: 13px; }
-  .results-heading { align-items: start; gap: 12px; padding-top: 24px; }
-  .results-heading h2 { font-size: 18px; }
-  .reset-link { font-size: 12px; }
+  .archive-heading { grid-template-columns: minmax(0,1fr) auto; grid-template-areas: 'title view' 'search search'; gap: 12px; padding: 28px 0 16px; }
+  .archive-search { width: 100%; }
+  .archive-search .search-input input { font-size: 16px; }
+  .archive-heading h1 { font-size: 18px; }
   .no-results,.not-found { padding: 44px 20px; }
   .no-results h2,.not-found h1 { font-size: 24px; }
   .no-results p,.not-found > p:not(.publication-label) { font-size: 15px; }

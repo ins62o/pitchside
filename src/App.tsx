@@ -2,11 +2,9 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Icon, Text, TextField } from '@seed-design/react'
 import { ActionButton } from 'seed-design/ui/action-button'
-import { ToggleButton } from 'seed-design/ui/toggle-button'
-import { articleKinds, leagues, readerArticles, relatedArticles, selectArticles } from './reader-data'
+import { readerArticles, relatedArticles, sections, selectArticles } from './reader-data'
 import type { ReaderArticle, ReaderFilter } from './reader-data'
 import MagazinePage from './MagazinePage'
-import QuoteShare from './QuoteShare'
 import { ArticleViewSwitch, ThemeToggle } from './ReaderControls'
 import type { ArticleViewProps } from './ReaderControls'
 import { readReaderPreferences, saveReaderPreferences } from './reader-preferences'
@@ -14,10 +12,9 @@ import { ArticleCategory, ArticleByline } from './ArticleMeta'
 import type { ArticleView } from './reader-preferences'
 import './App.css'
 
-const archiveUrl = ({ league, kind, query }: ReaderFilter = {}) => {
+const archiveUrl = ({ section, query }: ReaderFilter = {}) => {
   const params = new URLSearchParams()
-  if (league) params.set('league', league)
-  if (kind) params.set('kind', kind)
+  if (section) params.set('section', section)
   if (query?.trim()) params.set('q', query.trim())
   return `#/articles${params.size ? `?${params}` : ''}`
 }
@@ -55,57 +52,39 @@ function HomePage() {
 }
 
 function ArchivePage({ params, route, view, onViewChange }: { params: URLSearchParams; route: string } & ArticleViewProps) {
-  const league = params.get('league') || ''
-  const heading = league === 'K리그1' ? '정상을 향한 경쟁, K리그1' : league === 'K리그2' ? '승격을 향한 도전, K리그2' : '우리 축구의 모든 이야기'
-  const kind = params.get('kind') || ''
+  const section = params.get('section') || ''
   const query = params.get('q') || ''
   const [input, setInput] = useState(query)
-  const [searchOpen, setSearchOpen] = useState(!!query || params.get('focus') === 'search')
-  const searchToggle = useRef<HTMLButtonElement>(null)
   const searchInput = useRef<HTMLInputElement>(null)
   const resultsTitle = useRef<HTMLHeadingElement>(null)
-  const items = selectArticles({ league, kind, query })
-  const active = !!(league || kind || query)
-
-  useEffect(() => {
-    if (searchOpen) searchInput.current?.focus({ preventScroll: true })
-  }, [searchOpen])
+  const items = selectArticles({ section, query })
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const target = archiveUrl({ league, kind, query: input })
+    const target = archiveUrl({ section, query: input })
     if (window.location.hash === target) resultsTitle.current?.focus()
     else window.location.hash = target
   }
   function clearSearch() {
     setInput('')
-    const target = archiveUrl({ league, kind })
+    const target = archiveUrl({ section })
     if (window.location.hash !== target) window.location.hash = `${target}${target.includes('?') ? '&' : '?'}focus=search`
     else searchInput.current?.focus()
   }
   return <div className="archive-page">
-    <div className="archive-heading"><h1>{heading}</h1><ActionButton ref={searchToggle} className="search-toggle" variant="ghost" layout="iconOnly" size="small" type="button" aria-label={searchOpen ? '기사 검색 닫기' : '기사 검색 열기'} aria-expanded={searchOpen} aria-controls="article-search-panel" onClick={() => setSearchOpen(open => !open)}><Icon svg={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 4.5 4.5" /></svg>} /></ActionButton></div>
-    <div id="article-search-panel" className="archive-search-panel" data-open={searchOpen} inert={!searchOpen} aria-hidden={!searchOpen}><div className="archive-search-clip">
-    <form className="archive-search" role="search" onSubmit={submit} onKeyDown={event => {
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        setSearchOpen(false)
-        searchToggle.current?.focus()
-      }
-    }}>
-        <div className="search-controls">
-          <TextField.Root className="search-input" variant="outline" size="medium" value={input} onValueChange={setInput}>
-            <TextField.Input ref={searchInput} data-article-search aria-label="기사 검색" type="search" maxLength={120} placeholder="찾고 싶은 기사 제목이나 내용을 입력하세요" />
-          </TextField.Root>
-          {input && <ActionButton className="ui-button clear-search" variant="neutralOutline" size="medium" type="button" onClick={clearSearch}>검색어 지우기</ActionButton>}
-          <ActionButton className="ui-button search-submit" variant="brandSolid" size="medium" type="submit">검색</ActionButton>
-        </div>
-    </form>
-    </div></div>
-    <div className="archive-filters"><div className="kind-filters" role="group" aria-label="기사 유형">{['', ...articleKinds].map(value => <ToggleButton className="ui-button type-filter" variant="neutralWeak" size="small" key={value || 'all'} pressed={kind === value} onPressedChange={() => { window.location.hash = archiveUrl({ league, kind: value, query }) }}>{value || '전체'}</ToggleButton>)}</div>{active && <a className="reset-link" href="#/articles">초기화</a>}</div>
-    <div className="results-heading"><h2 ref={resultsTitle} tabIndex={-1}>{query ? `‘${query}’ 검색 결과` : league || '전체 기사'} <span>{items.length}건</span></h2><div className="results-actions"><ArticleViewSwitch view={view} onViewChange={onViewChange} /></div></div>
-    <p className="sr-only" role="status">{league} {kind} {query ? `${query} 검색 결과` : '기사'} {items.length}건</p>
-    {items.length ? <ArticleRows items={items} returnTo={route} view={view} /> : <div className="no-results"><h2>조건에 맞는 기사가 없습니다.</h2><p>검색어를 줄이거나 다른 리그·기사 유형을 선택해보세요.</p><ActionButton asChild className="ui-button outline-link" variant="neutralOutline" size="medium"><a href="#/articles">모든 기사 다시 보기</a></ActionButton></div>}
+    <div className="archive-heading">
+      <h1 ref={resultsTitle} tabIndex={-1}>{query ? `‘${query}’ 검색 결과` : section || '전체기사'} <span>{items.length}건</span></h1>
+      <form className="archive-search" role="search" onSubmit={submit}>
+        <TextField.Root className="search-input" variant="outline" size="medium" value={input} onValueChange={setInput}>
+          <TextField.Input ref={searchInput} data-article-search aria-label="기사 검색" type="search" enterKeyHint="search" maxLength={120} placeholder="기사 검색" />
+        </TextField.Root>
+        <ActionButton className="search-submit" variant="ghost" layout="iconOnly" size="small" type="submit" aria-label="검색" title="검색"><Icon svg={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.5 15.5 4.5 4.5" /></svg>} /></ActionButton>
+        {input && <ActionButton className="clear-search" variant="ghost" layout="iconOnly" size="small" type="button" aria-label="검색어 지우기" title="검색어 지우기" onClick={clearSearch}><Icon svg={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="m7 7 10 10M17 7 7 17" /></svg>} /></ActionButton>}
+      </form>
+      <ArticleViewSwitch view={view} onViewChange={onViewChange} />
+    </div>
+    <p className="sr-only" role="status">{section} {query ? `${query} 검색 결과` : '기사'} {items.length}건</p>
+    {items.length ? <ArticleRows items={items} returnTo={route} view={view} /> : <div className="no-results">{query ? <><h2>조건에 맞는 기사가 없습니다.</h2><p>검색어를 줄이거나 다른 분류를 선택해보세요.</p></> : <><h2>아직 등록된 기사가 없습니다.</h2><p>다른 분류의 기사를 먼저 둘러보세요.</p></>}<ActionButton asChild className="ui-button outline-link" variant="neutralOutline" size="medium"><a href="#/articles">모든 기사 다시 보기</a></ActionButton></div>}
   </div>
 }
 
@@ -113,11 +92,10 @@ function ArticlePage({ article, params }: { article: ReaderArticle; params: URLS
   const candidate = params.get('from') || ''
   const returnTo = candidate === '/magazine' || candidate === '/articles' || candidate.startsWith('/articles?') ? `#${candidate}` : '#/articles'
   const returnLabel = candidate === '/magazine' ? '팬 매거진' : '기사 목록'
-  const source = { title: article.title, author: article.author, date: article.date, quote: article.body.find(section => section.quote)?.quote?.text ?? article.summary }
   return <article className="story-page">
     <header className="story-heading"><ArticleCategory article={article} /><h1>{article.title}</h1><ArticleByline article={article} readingTime /></header>
     <figure className="story-figure"><div className="story-image"><ArticleImage article={article} eager /></div><figcaption>{article.image?.caption}</figcaption></figure>
-    <div className="story-body"><QuoteShare source={source}>{article.body.map((section, i) => <section key={i}>{section.heading && <h2>{section.heading}</h2>}{section.paragraphs.map((paragraph, j) => <p key={j}>{paragraph}</p>)}{section.quote && <figure className="pull-quote"><blockquote><p>{section.quote.text}</p></blockquote><figcaption>{section.quote.speaker}</figcaption></figure>}</section>)}</QuoteShare><div className="story-end"><p>{article.author} 기자</p><a href={returnTo} className="text-link">{returnLabel}으로</a></div></div>
+    <div className="story-body">{article.body.map((section, i) => <section key={i}>{section.heading && <h2>{section.heading}</h2>}{section.paragraphs.map((paragraph, j) => <p key={j}>{paragraph}</p>)}{section.quote && <figure className="pull-quote"><blockquote><p>{section.quote.text}</p></blockquote><figcaption>{section.quote.speaker}</figcaption></figure>}</section>)}<div className="story-end"><p>{article.author} 기자</p><a href={returnTo} className="text-link">{returnLabel}으로</a></div></div>
     <section className="related-section" aria-labelledby="related-heading"><div className="section-heading"><h2 id="related-heading">이어서 읽는 이야기</h2></div><div className="related-grid">{relatedArticles(article).map(item => <article key={item.id}><ArticleCategory article={item} /><h3><a className="card-link" href={storyUrl(item, returnTo.slice(1))}>{item.title}</a></h3><p>{item.summary}</p><ArticleByline article={item} /></article>)}</div></section>
   </article>
 }
@@ -148,7 +126,7 @@ export default function App() {
   const articleId = path.startsWith('/articles/') ? path.slice(10) : path.startsWith('/magazine/') ? path.slice(10) : ''
   const article = readerArticles.find(item => item.id === articleId)
   const archive = path === '/articles'
-  const currentLeague = archive ? params.get('league') : article?.league
+  const currentSection = archive ? params.get('section') : article?.section
 
   useLayoutEffect(() => {
     if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
@@ -185,7 +163,12 @@ export default function App() {
       const oldParams = new URLSearchParams(oldSearch)
       if (oldPath === '/search' || (oldPath === '/' && oldParams.has('category'))) {
         const category = oldParams.get('category') || ''
-        window.location.replace(archiveUrl({ query: oldParams.get('q') || '', league: leagues.includes(category as typeof leagues[number]) ? category : '' }))
+        window.location.replace(archiveUrl({ query: oldParams.get('q') || '', section: category.startsWith('K리그') ? 'K리그' : '' }))
+        return
+      }
+      // 이전 K리그1·K리그2 메뉴와 기사 유형 필터 주소는 새 분류 주소로 옮긴다.
+      if (oldPath === '/articles' && (oldParams.has('league') || oldParams.has('kind'))) {
+        window.location.replace(archiveUrl({ query: oldParams.get('q') || '', section: oldParams.has('league') ? 'K리그' : oldParams.get('section') || '' }))
         return
       }
       setRoute(next)
@@ -205,14 +188,14 @@ export default function App() {
   useEffect(() => {
     document.title = 'pitchside'
     const description = document.querySelector<HTMLMetaElement>('meta[name="description"]')
-    if (description) description.content = article?.summary || 'K리그1과 K리그2의 경기, 사람, 전술을 읽는 Pitchside. 경기장 가까이에서 우리 축구의 이야기를 전합니다.'
+    if (description) description.content = article?.summary || 'K리그부터 K3·K4리그, 대학·유스까지 우리 축구의 경기, 사람, 전술을 읽는 Pitchside. 경기장 가까이에서 우리 축구의 이야기를 전합니다.'
   }, [article, archive, path])
 
   if (path === '/magazine' || path.startsWith('/magazine/') || (article && params.get('from') === '/magazine')) return <MagazinePage key={path} page={path === '/magazine' ? 'home' : path === '/magazine/about' ? 'about' : 'detail'} article={article} mainRef={main} themeControl={themeControl} />
 
   return <div className="pitchside-reader">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); main.current?.focus() }}>본문으로 바로가기</a>
-    <header className="site-header"><div className="header-inner"><Brand /><div className="header-actions">{themeControl}<a href="#/magazine" className="header-magazine"><span className="header-magazine-label">Magazine <span aria-hidden="true">↗</span></span></a></div></div><nav className="primary-nav" aria-label="주 메뉴"><div className="nav-inner"><a href="#/" aria-current={path === '/' ? 'page' : undefined}>홈</a><a href={archiveUrl(archive ? { kind: params.get('kind') || '', query: params.get('q') || '' } : {})} aria-current={archive && !currentLeague ? 'page' : undefined}>전체 기사</a>{leagues.map(league => <a key={league} href={archiveUrl({ league, ...(archive ? { kind: params.get('kind') || '', query: params.get('q') || '' } : {}) })} aria-current={currentLeague === league ? 'page' : undefined}>{league}</a>)}</div></nav></header>
+    <header className="site-header"><div className="header-inner"><Brand /><div className="header-actions">{themeControl}<a href="#/magazine" className="header-magazine"><span className="header-magazine-label">Magazine <span aria-hidden="true">↗</span></span></a></div></div><nav className="primary-nav" aria-label="주 메뉴"><div className="nav-inner"><a href={archiveUrl(archive ? { query: params.get('q') || '' } : {})} aria-current={archive && !currentSection ? 'page' : undefined} data-label="전체기사">전체기사</a>{sections.map(section => <a key={section} href={archiveUrl({ section, ...(archive ? { query: params.get('q') || '' } : {}) })} aria-current={currentSection === section ? 'page' : undefined} data-label={section}>{section}</a>)}</div></nav></header>
     <main className="page-container" id="main-content" ref={main} tabIndex={-1} key={route}>{path === '/' ? <HomePage /> : archive ? <ArchivePage params={params} route={route} {...viewProps} /> : article ? <ArticlePage article={article} params={params} /> : <NotFound />}</main>
     <footer className="site-footer"><div className="footer-inner"><Brand /><p className="footer-copyright">© 2026 Pitchside</p></div></footer>
   </div>
