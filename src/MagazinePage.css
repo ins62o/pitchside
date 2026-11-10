@@ -1,73 +1,59 @@
 @font-face { font-family: 'Gowun Batang'; src: url('/fonts/GowunBatang-Regular.woff2') format('woff2'); font-style: normal; font-weight: 400; font-display: swap; }
-.magazine { --mag-paper: #f4f1ea; --mag-ink: #292924; --mag-muted: #66665e; --mag-line: #cdccc1; --mag-accent: #713e48; --mag-serif: 'Gowun Batang','Iowan Old Style',Georgia,serif; --line: var(--mag-line); --muted: var(--mag-muted); background: var(--mag-paper); color: var(--mag-ink); font-family: Pretendard,sans-serif; }
-:root[data-seed-color-mode='dark-only'] .magazine { --mag-paper: #222420; --mag-ink: #edece2; --mag-muted: #babbb0; --mag-line: #494c42; --mag-accent: #d9aeb7; }
+
+/* 팬 매거진은 기사 사이트와 별도의 어두운 지면을 쓰고, 사이트의 라이트·다크 선택과 관계없이 같은 색을 유지한다. */
+.magazine {
+  --mag-paper: #0C0C0C;
+  --mag-surface: #16181B;
+  --mag-ink: #D7E2EA;
+  --mag-muted: #8B949B;
+  --mag-line: #2A2D31;
+  --mag-accent: #D58BE0;
+  --mag-serif: 'Gowun Batang','Iowan Old Style',Georgia,serif;
+  --mag-radius: 40px;
+  /* 매거진의 모든 섹션은 스토리 카드와 같은 폭(최대 1400px, 좌우 여백 20·32·40px)을 쓴다. */
+  --mag-gutter: 20px;
+  --mag-width: min(1400px, calc(100% - 2 * var(--mag-gutter)));
+  /* 문장 카드 등 공용 컴포넌트가 읽는 변수 */
+  --line: var(--mag-line);
+  --muted: var(--mag-muted);
+  --ink: var(--mag-ink);
+  --surface: var(--mag-surface);
+  min-height: 100svh;
+  background: var(--mag-paper);
+  color: var(--mag-ink);
+  font-family: Kanit, Pretendard, sans-serif;
+  overflow-x: clip;
+}
+:root.magazine-root { background: #0C0C0C; }
 .magazine > main { outline: none; }
-.magazine ::selection { background: var(--mag-accent); color: var(--mag-paper); }
-.mag-header,.mag-cover-section,.mag-issues,.mag-editor-note,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: min(1400px,calc(100% - 96px)); margin-inline: auto; }
-.mag-nav { min-height: 68px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; font-size: 12px; border-bottom: 1px solid var(--mag-line); }
-.mag-nav > a:first-child { justify-self: start; min-height: 44px; display: flex; align-items: center; }
-.mag-nav-center { justify-self: center; letter-spacing: 2.5px; font-size: 10px; }
-.mag-nav > div { justify-self: end; display: flex; gap: 20px; align-items: center; }
-.mag-nav > div > a { min-height: 44px; display: inline-flex; align-items: center; }
-.mag-nav a:hover { color: var(--mag-accent); }
-.mag-nav .theme-toggle { border: 0; background: transparent; color: var(--mag-ink); }
-.mag-masthead { display: block; width: fit-content; max-width: 100%; margin: 26px auto 30px; text-align: center; font: 400 clamp(62px,10.8vw,160px)/.98 'Iowan Old Style','Bodoni MT',Georgia,serif; letter-spacing: -.055em; }
-.mag-masthead > span { display: block; padding-top: 18px; font: 400 12px/1.5 Pretendard,sans-serif; letter-spacing: 2px; }
-.mag-cover { display: block; position: relative; min-height: 520px; height: min(64vw,660px); color: #fff8ed; overflow: hidden; }
-.mag-photo { position: relative; width: 100%; height: 100%; overflow: hidden; background: #353c32; }
+.magazine ::selection { background: #B600A8; color: #fff; }
+.magazine a:focus-visible,.magazine button:focus-visible { outline-color: var(--mag-ink); }
+.magazine .quote-export .quote-primary { background: var(--mag-ink); border-color: var(--mag-ink); color: var(--mag-paper); }
+.mag-gradient { background: linear-gradient(180deg, #646973 0%, #BBCCD7 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+
+.mag-footer,.mag-detail,.mag-about,.mag-missing { width: var(--mag-width); margin-inline: auto; }
+.jk-nav a[aria-current=page] { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 2px; }
+
+.mag-photo { position: relative; width: 100%; height: 100%; overflow: hidden; background: #1A1C1F; }
 .mag-photo img { width: 100%; height: 100%; object-fit: cover; }
-.mag-photo-placeholder { width: 100%; height: 100%; min-height: 260px; display: grid; place-items: center; font: italic 700 40px Arial,sans-serif; color: #f4f1ea; }
-.mag-cover > .mag-photo { position: absolute; inset: 0; }
-.mag-cover img { object-position: center 45%; }
-.mag-cover-shade { position: absolute; inset: 0; background: linear-gradient(180deg,transparent 15%,#14171024 40%,#141710c9 100%); }
-.mag-cover-copy { position: absolute; bottom: 52px; left: 56px; right: 40px; }
-.mag-cover-copy > p { font-size: 14px; letter-spacing: 2px; margin-bottom: 20px; }
-.mag-cover-copy h1 { font: 400 clamp(44px,5.8vw,84px)/1.35 var(--mag-serif); letter-spacing: -3px; }
-.mag-cover-copy > span { display: flex; width: fit-content; align-items: center; gap: 40px; font-size: 12px; margin-top: 28px; padding-bottom: 10px; border-bottom: 1px solid #fff8ed99; }
-.mag-cover-copy > span > span { font-size: 19px; }
-.mag-cover-controls { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--mag-line); }
-.mag-cover-controls > p { font-size: 12px; display: flex; gap: 24px; }
-.mag-cover-controls p > span { color: var(--mag-muted); }
-.mag-cover-controls > div { display: flex; gap: 6px; }
-.mag-cover-controls button { min-height: 44px; min-width: 44px; border: 0; border-bottom: 1px solid transparent; background: transparent; color: var(--mag-muted); font: 12px Georgia,serif; }
-.mag-cover-controls button[aria-pressed=true] { color: var(--mag-ink); border-color: var(--mag-ink); }
-.mag-issues { padding-block: 92px 100px; }
-.mag-section-heading { margin-bottom: 40px; }
-.mag-section-heading h2 { font: 400 32px/1.5 var(--mag-serif); letter-spacing: -1px; }
-.mag-section-heading p { margin-top: 12px; color: var(--mag-muted); font-size: 13px; line-height: 1.7; }
-.mag-issue-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 30px; }
-.mag-issue { min-width: 0; }
-.mag-issue-cover { position: relative; aspect-ratio: 210/297; color: #fff8ed; overflow: hidden; }
-.mag-issue-cover .mag-photo { position: absolute; inset: 0; }
-.mag-issue-shade { position: absolute; inset: 0; background: linear-gradient(180deg,#11170c33,transparent 40%,#11170cc2); }
-.mag-issue-print { position: absolute; inset: 20px; display: flex; flex-direction: column; text-align: center; }
-.mag-issue-print > span { font: 26px/1.2 'Iowan Old Style',Georgia,serif; letter-spacing: -1px; }
-.mag-issue-print > strong { margin-top: auto; font: 400 clamp(20px,2.1vw,32px)/1.6 var(--mag-serif); letter-spacing: -1px; }
-.mag-issue-print > small { margin-top: 16px; font-size: 8px; letter-spacing: 2px; }
-.mag-issue-caption { display: flex; align-items: baseline; gap: 12px; margin-top: 20px; }
-.mag-issue-caption > span { font: 12px/1.5 Georgia,serif; color: var(--mag-muted); }
-.mag-issue-caption > span:last-child { margin-left: auto; font-size: 20px; }
-.mag-issue-caption h3 { font-size: 16px; font-weight: 550; line-height: 1.6; }
-.mag-issue-caption p { font-size: 11px; color: var(--mag-muted); line-height: 1.7; margin-top: 5px; }
-.mag-editor-note { padding: 64px 0 80px; border-top: 1px solid var(--mag-line); display: grid; grid-template-columns: 1fr 1.1fr; column-gap: 80px; }
-.mag-editor-note > p { grid-column: 1/-1; color: var(--mag-accent); font-size: 10px; letter-spacing: 2px; margin-bottom: 30px; }
-.mag-editor-note h2 { font: 400 clamp(28px,3.4vw,46px)/1.65 var(--mag-serif); letter-spacing: -1.5px; }
-.mag-editor-note > div > p { font-size: 15px; line-height: 2.1; color: var(--mag-muted); }
-.mag-editor-note > div > a { display: inline-block; margin-top: 22px; padding-block: 10px; text-decoration: underline; text-underline-offset: 7px; font-size: 12px; }
-.mag-footer { padding-block: 40px 28px; border-top: 1px solid var(--mag-line); }
-.mag-footer-brand { font: 34px/1.2 'Iowan Old Style',Georgia,serif; letter-spacing: -1px; }
-.mag-footer > p { font-size: 12px; color: var(--mag-muted); margin-top: 12px; }
-.mag-footer > div { display: flex; justify-content: space-between; gap: 16px; margin-top: 36px; font-size: 11px; color: var(--mag-muted); }
-.mag-footer > div > a { padding-block: 10px; }
-.mag-footer small { align-self: center; }
-.mag-detail-heading { max-width: 800px; margin: 48px auto 56px; text-align: center; }
-.mag-detail-heading > a { display: inline-block; font-size: 11px; color: var(--mag-muted); text-decoration: underline; text-underline-offset: 5px; padding: 12px; }
-.mag-detail-heading > p { font-size: 13px; margin-top: 40px; letter-spacing: 1px; color: var(--mag-accent); }
-.mag-detail-heading h1 { font: 400 clamp(36px,5.6vw,72px)/1.55 var(--mag-serif); margin-top: 18px; letter-spacing: -2.5px; }
-.mag-detail-heading > div { display: flex; justify-content: center; gap: 12px; margin-top: 28px; font-size: 12px; color: var(--mag-muted); }
-.mag-detail-hero { margin-bottom: 72px; }
+.mag-photo-placeholder { width: 100%; height: 100%; min-height: 260px; display: grid; place-items: center; font: italic 700 40px Arial,sans-serif; color: var(--mag-ink); }
+.mag-detail-hero .mag-photo,.mag-inline-image .mag-photo,.mag-about > .mag-photo { border-radius: var(--mag-radius); }
+
+.mag-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 40px; border-top: 1px solid var(--mag-line); }
+.mag-footer-brand { font: 900 34px/1.1 Kanit,sans-serif; letter-spacing: -.02em; }
+.mag-footer small { font: 400 12px/1.4 Kanit,sans-serif; letter-spacing: .04em; color: var(--mag-muted); white-space: nowrap; }
+
+/* 상세 */
+.mag-detail-heading { max-width: 960px; margin: 56px auto 64px; text-align: center; }
+.mag-detail-heading > a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; color: var(--mag-muted); font: 500 12px/1 Kanit,sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.mag-detail-heading > a:hover { color: var(--mag-ink); }
+.mag-detail-heading > p:first-of-type { margin-top: 32px; color: var(--mag-muted); font: 500 12px/1.4 Kanit,Pretendard,sans-serif; letter-spacing: .24em; text-transform: uppercase; }
+.mag-detail-heading h1 { margin-top: 18px; font: 400 clamp(40px,6.4vw,96px)/1.4 var(--mag-serif); letter-spacing: -.04em; }
+.mag-detail-sub { margin-top: 14px; font: 300 clamp(15px,1.6vw,19px)/1.6 Pretendard,sans-serif; color: var(--mag-ink); }
+.mag-detail-heading > div { display: flex; justify-content: center; gap: 12px; margin-top: 28px; font: 400 13px/1.5 Pretendard,sans-serif; color: var(--mag-muted); }
+.mag-detail-hero { margin-bottom: 80px; }
 .mag-detail-hero .mag-photo { height: min(66vw,740px); min-height: 360px; }
-.mag-detail-hero figcaption,.mag-inline-image figcaption { margin-top: 12px; text-align: center; color: var(--mag-muted); font: 12px/1.8 Pretendard,sans-serif; }
+.mag-detail-hero figcaption,.mag-inline-image figcaption { margin-top: 14px; text-align: center; color: var(--mag-muted); font: 12px/1.8 Pretendard,sans-serif; }
 .mag-detail-intro { max-width: 700px; margin: 0 auto 72px; text-align: center; }
 .mag-detail-intro > p { font: 400 25px/1.9 var(--mag-serif); word-break: keep-all; }
 .mag-detail-intro > span { display: block; margin-top: 36px; font-size: 24px; color: var(--mag-accent); }
@@ -75,80 +61,40 @@
 .mag-body > section { max-width: 700px; margin: 0 auto 64px; }
 .mag-body h2 { font: 600 24px/1.7 Pretendard,sans-serif; letter-spacing: -.6px; margin-bottom: 28px; }
 .mag-body section > p { margin-bottom: 30px; }
-.mag-body strong { font-family: Pretendard,sans-serif; font-size: .96em; line-height: 2; font-weight: 650; }
+.mag-body strong { font-family: Pretendard,sans-serif; font-size: .96em; line-height: 2; font-weight: 650; color: #fff; }
 .mag-body u { text-decoration-thickness: 1px; text-underline-offset: 7px; text-decoration-color: var(--mag-accent); }
 .mag-body blockquote { padding-block: 32px; margin-block: 48px; }
 .mag-body blockquote > p { font: 400 29px/1.9 var(--mag-serif); word-break: keep-all; }
 .mag-body cite { display: block; font: normal 12px/1.7 Pretendard,sans-serif; color: var(--mag-muted); margin-top: 22px; }
-.mag-inline-image { width: min(1040px,calc(100vw - 96px)); position: relative; left: 50%; transform: translateX(-50%); margin-block: 64px; }
+.mag-inline-image { width: min(1040px, calc(100vw - 2 * var(--mag-gutter))); position: relative; left: 50%; transform: translateX(-50%); margin-block: 64px; }
 .mag-inline-image .mag-photo { height: min(65vw,640px); }
-.mag-detail-end { max-width: 700px; margin: 24px auto 88px; display: flex; justify-content: space-between; gap: 16px; font-size: 12px; color: var(--mag-muted); }
-.mag-detail-end a { text-decoration: underline; text-underline-offset: 6px; }
+.mag-detail-end { max-width: 700px; margin: 24px auto 96px; display: flex; justify-content: space-between; align-items: center; gap: 16px; font: 400 13px/1.5 Pretendard,sans-serif; color: var(--mag-muted); }
 .mag-next-story { border-top: 1px solid var(--mag-line); padding: 48px 0 72px; }
-.mag-next-story > p { font-size: 12px; color: var(--mag-muted); margin-bottom: 24px; }
-.mag-next-story > a { display: flex; justify-content: space-between; align-items: center; font: 400 40px/1.6 var(--mag-serif); }
-.mag-next-story span { font-family: Pretendard,sans-serif; }
+.mag-next-story > p { font: 500 12px/1 Kanit,sans-serif; letter-spacing: .24em; text-transform: uppercase; color: var(--mag-muted); margin-bottom: 24px; }
+.mag-next-story > a { display: flex; justify-content: space-between; align-items: center; gap: 24px; font: 400 clamp(32px,4.4vw,56px)/1.5 var(--mag-serif); letter-spacing: -.03em; }
+.mag-next-story > a > span:last-child { font-family: Kanit,sans-serif; color: var(--mag-ink); }
+
+/* 소개 */
 .mag-about > header { text-align: center; margin: 64px auto; }
-.mag-about header > p { font-size: 10px; letter-spacing: 2px; color: var(--mag-accent); margin-bottom: 24px; }
-.mag-about h1 { font: 400 clamp(30px,4.8vw,64px)/1.7 var(--mag-serif); letter-spacing: -2px; }
+.mag-about header > p { font: 500 12px/1 Kanit,sans-serif; letter-spacing: .24em; color: var(--mag-muted); margin-bottom: 24px; }
+.mag-about h1 { font: 400 clamp(30px,4.8vw,64px)/1.7 var(--mag-serif); letter-spacing: -.04em; }
 .mag-about > .mag-photo { height: min(62vw,700px); }
 .mag-about-body { max-width: 640px; margin: 72px auto 100px; font: 18px/2.1 var(--mag-serif); }
 .mag-about-body p { margin-bottom: 28px; }
 .mag-about-body h2 { font-size: 26px; margin-top: 56px; margin-bottom: 24px; }
-.mag-about-body > a { display: inline-block; font: 13px/1.6 Pretendard,sans-serif; padding-block: 12px; text-decoration: underline; text-underline-offset: 6px; margin-top: 20px; }
+.mag-about-body > .jk-contact { margin-top: 24px; }
 .mag-missing { padding-block: 80px; text-align: center; }
 .mag-missing a { display: inline-block; padding: 24px; text-decoration: underline; }
-@media(hover: hover) and (prefers-reduced-motion: no-preference) {
-  .mag-cover img,.mag-issue-cover img { transition: transform 700ms ease; }
-  .mag-cover:hover img,.mag-issue a:hover img { transform: scale(1.025); }
-  .mag-issue a:hover h3 { color: var(--mag-accent); }
-}
-@media(max-width: 1024px) {
-  .mag-header,.mag-cover-section,.mag-issues,.mag-editor-note,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: calc(100% - 64px); }
-  .mag-issue-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 44px 28px; }
-  .mag-issue-print > strong { font-size: 32px; }
-  .mag-cover { min-height: 480px; }
-  .mag-editor-note { column-gap: 40px; }
-  .mag-desktop-break { display: none; }
-}
+
+@media(min-width: 640px) { .magazine { --mag-radius: 50px; --mag-gutter: 32px; } }
+@media(min-width: 768px) { .magazine { --mag-radius: 60px; --mag-gutter: 40px; } }
 @media(max-width: 640px) {
-  .mag-header,.mag-cover-section,.mag-issues,.mag-editor-note,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: calc(100% - 40px); }
-  .mag-nav { min-height: 56px; grid-template-columns: 1fr auto; font-size: 11px; }
-  .mag-nav-center { display: none; }
-  .mag-nav > div { gap: 8px; }
-  .mag-masthead { font-size: clamp(50px,12.4vw,80px); margin-block: 24px 26px; }
-  .mag-masthead > span { font-size: 10px; letter-spacing: 1px; padding-top: 12px; }
-  .mag-cover { height: 68svh; min-height: 440px; max-height: 660px; }
-  .mag-cover-copy { left: 24px; right: 20px; bottom: 36px; }
-  .mag-cover-copy > p { font-size: 11px; letter-spacing: .5px; margin-bottom: 10px; }
-  .mag-cover-copy h1 { font-size: 42px; letter-spacing: -2px; }
-  .mag-cover-copy > span { margin-top: 22px; font-size: 11px; }
-  .mag-cover-controls { gap: 8px; padding-block: 10px; }
-  .mag-cover-controls > p { flex-direction: column; gap: 6px; font-size: 10px; }
-  .mag-cover-controls > div { gap: 0; }
-  .mag-issues { padding-block: 56px; }
-  .mag-section-heading { margin-bottom: 28px; }
-  .mag-section-heading h2 { font-size: 25px; }
-  .mag-section-heading p { font-size: 11px; }
-  .mag-issue-grid { gap: 32px 16px; }
-  .mag-issue-print { inset: 12px; }
-  .mag-issue-print > span { font-size: clamp(14px,4.1vw,24px); }
-  .mag-issue-print > strong { font-size: clamp(16px,4.5vw,25px); letter-spacing: -.8px; line-height: 1.7; }
-  .mag-issue-print > small { font-size: 6px; letter-spacing: 1px; margin-top: 8px; }
-  .mag-issue-caption { gap: 7px; margin-top: 12px; }
-  .mag-issue-caption > span:first-child { display: none; }
-  .mag-issue-caption h3 { font-size: 14px; }
-  .mag-issue-caption p { font-size: 10px; }
-  .mag-issue-cover .photo-watermark { display: none; }
-  .mag-editor-note { display: block; padding-block: 40px 56px; }
-  .mag-editor-note > p { margin-bottom: 24px; }
-  .mag-editor-note h2 { font-size: 30px; margin-bottom: 24px; }
-  .mag-editor-note > div > p { font-size: 14px; }
-  .mag-footer { padding-top: 32px; }
-  .mag-detail-heading { margin-block: 28px 36px; }
-  .mag-detail-heading > p { margin-top: 24px; font-size: 12px; }
-  .mag-detail-heading h1 { font-size: 38px; letter-spacing: -1.5px; }
-  .mag-detail-heading > div { font-size: 11px; margin-top: 20px; }
+  .mag-footer { padding-block: 32px; }
+  .mag-footer-brand { font-size: 26px; }
+  .mag-detail-heading { margin-block: 32px 40px; }
+  .mag-detail-heading > p:first-of-type { margin-top: 20px; font-size: 11px; }
+  .mag-detail-heading h1 { font-size: 40px; }
+  .mag-detail-heading > div { font-size: 12px; margin-top: 20px; }
   .mag-detail-hero { margin-bottom: 40px; }
   .mag-detail-hero .mag-photo { min-height: 0; height: 70svh; max-height: 520px; }
   .mag-detail-hero figcaption,.mag-inline-image figcaption { font-size: 10px; }
@@ -160,13 +106,13 @@
   .mag-body section > p { margin-bottom: 26px; }
   .mag-body blockquote { margin-block: 32px; padding-block: 20px; }
   .mag-body blockquote > p { font-size: 24px; }
-  .mag-inline-image { width: calc(100vw - 40px); margin-block: 40px; }
+  .mag-inline-image { margin-block: 40px; }
   .mag-inline-image .mag-photo { height: 85vw; }
-  .mag-detail-end { margin-bottom: 56px; }
+  .mag-detail-end { margin-bottom: 56px; flex-direction: column; align-items: flex-start; }
   .mag-next-story { padding-block: 32px 48px; }
   .mag-next-story > a { font-size: 30px; }
   .mag-about > header { margin-block: 40px; }
-  .mag-about h1 { font-size: 29px; letter-spacing: -1.2px; }
+  .mag-about h1 { font-size: 29px; }
   .mag-about > .mag-photo { height: 80vw; }
   .mag-about-body { margin-block: 44px 64px; font-size: 17px; }
 }

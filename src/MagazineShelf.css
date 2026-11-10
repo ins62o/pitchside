@@ -1,0 +1,79 @@
+/* 팬 매거진 책 선반. 색은 --shelf-* 변수로 받고, 기본값은 매거진 종이 지면을 따른다. */
+.mag-shelf-section {
+  --H: min(50svh, 33vw);
+  --shelf-bg: var(--mag-paper);
+  --shelf-ink: var(--mag-ink);
+  --shelf-sub: var(--mag-accent);
+  --shelf-muted: var(--mag-muted);
+  --shelf-accent: var(--mag-accent);
+  --shelf-on: var(--mag-paper);
+  --shelf-rule: color-mix(in srgb, var(--mag-ink) 85%, transparent);
+  --shelf-ease: cubic-bezier(.2,.8,.2,1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-x: clip;
+  color: var(--shelf-ink);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+
+.mag-shelf-wrap { position: relative; height: calc(var(--H) + 80px); contain: layout style; }
+.mag-shelf { position: absolute; inset: 0; perspective: 2200px; perspective-origin: 50% 50%; touch-action: pan-y; outline: none; }
+.mag-shelf:focus-visible { outline: 1px solid var(--shelf-ink); outline-offset: -6px; }
+.mag-shelf-stage { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+.shelf-tape { cursor: pointer; position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
+.shelf-face { position: absolute; top: calc(var(--h) / -2); height: var(--h); overflow: hidden; border-radius: 2px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+/* 책 음영 겸 양끝 페이드. 바탕색으로 덮어 가장자리 책이 테두리나 단면 없이 배경 속으로 사라지게 한다. */
+.shelf-veil { position: absolute; inset: 0; z-index: 1; border-radius: inherit; background: var(--shelf-bg); opacity: 0; pointer-events: none; }
+.shelf-face img { max-width: none; width: 100%; height: 100%; object-fit: cover; }
+
+/* 책등: 정면, 폭 --ws */
+.shelf-sp { width: var(--ws); left: calc(var(--ws) / -2); transform: translateZ(calc(var(--d) / 2)); display: flex; flex-direction: column; align-items: center; gap: calc(var(--ws) * .16); padding: calc(var(--ws) * .16) 0 calc(var(--ws) * .2); background: var(--sp-bg); color: var(--sp-fg); box-shadow: inset 1px 0 rgba(255,255,255,.14), inset -1px 0 rgba(0,0,0,.22); }
+.shelf-sp .no { font: 400 calc(var(--ws) * .2)/1 'Iowan Old Style', Georgia, serif; letter-spacing: .04em; }
+.shelf-sp .ph { display: block; flex: none; width: calc(var(--ws) * .74); aspect-ratio: 3/4; overflow: hidden; }
+.shelf-sp .tt { flex: 1; min-height: 0; overflow: hidden; writing-mode: vertical-rl; white-space: nowrap; font: 400 calc(var(--ws) * .38)/1 var(--mag-serif); letter-spacing: .1em; }
+/* p. 배지는 고정 크기 상자 안에서 가로·세로 가운데에 놓는다. Arial 굵은 이탤릭 ‘p.’의 잉크는 글자 상자보다 왼쪽·아래로 치우쳐 있어(가로 −4%, 세로 +18%) 그만큼 되돌린다. */
+.shelf-sp .mk { flex: none; display: grid; place-items: center; width: calc(var(--ws) * .4); height: calc(var(--ws) * .34); border: 1px solid currentColor; font: italic 700 calc(var(--ws) * .19)/1 Arial, sans-serif; }
+.shelf-sp .mk::before { content: 'p.'; display: block; transform: translate(4%, -18%); }
+
+/* 표지: 오른쪽 옆면, 폭 --d(A4 비율) */
+/* 회전한 면에 overflow: hidden을 주면 Chrome에서 클릭 판정이 사라지므로 표지는 잘라내지 않는다. */
+.shelf-cv { overflow: visible; width: var(--d); left: calc(var(--d) / -2); transform: rotateY(90deg) translateZ(calc(var(--ws) / 2)); background: #353c32; color: #fff8ed; box-shadow: 0 30px 60px -28px rgba(0,0,0,.75); }
+.shelf-cv > img,.shelf-cv .shade { position: absolute; inset: 0; border-radius: inherit; }
+.shelf-cv .shade { position: absolute; inset: 0; background: linear-gradient(180deg, #11170c70, transparent 36%, transparent 50%, #11170ce0); }
+.shelf-cv .print { position: absolute; inset: calc(var(--d) * .07); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.shelf-cv .mast { font: 400 calc(var(--d) * .16)/1 'Iowan Old Style', 'Bodoni MT', Georgia, serif; letter-spacing: -.05em; }
+.shelf-cv .issue { margin-top: calc(var(--d) * .035); font: 500 calc(var(--d) * .032)/1 Pretendard, sans-serif; letter-spacing: .24em; }
+.shelf-cv .ttl { margin-top: auto; font: 400 calc(var(--d) * .105)/1.4 var(--mag-serif); letter-spacing: -.03em; word-break: keep-all; }
+.shelf-cv .sub { margin-top: calc(var(--d) * .03); font: 400 calc(var(--d) * .04)/1.5 Pretendard, sans-serif; }
+.shelf-cv .lb { margin-top: calc(var(--d) * .05); font: 600 calc(var(--d) * .028)/1 Pretendard, sans-serif; letter-spacing: .24em; }
+
+.mag-shelf-play { position: absolute; z-index: 5; left: calc(50% - var(--d) / 2 - 6px); top: calc(50% + var(--h) * .36); width: 42px; height: 42px; margin: -21px 0 0 -21px; padding: 0; display: grid; place-items: center; border: 1px solid var(--shelf-ink); border-radius: 50%; background: color-mix(in srgb, var(--shelf-bg) 72%, transparent); color: var(--shelf-ink); transform: scale(0); }
+.mag-shelf-play svg { margin-left: 2px; }
+
+.mag-shelf-row { display: grid; grid-template-columns: 44px minmax(0,1fr) 44px; align-items: start; width: calc(100% - 40px); margin: 22px auto 0; }
+.mag-shelf-arrow { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; background: none; color: inherit; }
+.mag-shelf-caption { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+.shelf-mask { position: relative; width: 100%; max-width: 760px; overflow: hidden; text-align: center; }
+.shelf-mask > span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.shelf-mask > span + span { position: absolute; left: 0; top: 0; width: 100%; }
+.shelf-title { font: 400 30px/1.4 var(--mag-serif); letter-spacing: -.02em; }
+.shelf-sub { font: 400 13px/1.5 Pretendard, sans-serif; color: var(--shelf-sub); }
+
+.mag-shelf-probe { position: absolute; left: -9999px; top: 0; width: 1px; height: var(--H); visibility: hidden; pointer-events: none; }
+
+
+/* 표지에서 자라 상세 지면이 되는 종이 */
+.mag-shelf-sheet { position: fixed; inset: 0; z-index: 200; overflow: hidden; background: var(--mag-paper); visibility: hidden; pointer-events: none; }
+.mag-shelf-sheet > img { max-width: none; width: 100%; height: 100%; object-fit: cover; }
+.mag-shelf-sheet > .veil { position: absolute; inset: 0; background: var(--mag-paper); }
+
+@media (max-width: 640px) {
+  .mag-shelf-section { --H: min(64vw, 42svh); }
+  .mag-shelf-row { width: calc(100% - 12px); margin-top: 18px; }
+  .shelf-title { font-size: 23px; }
+  .shelf-sub { font-size: 12px; }
+}
