@@ -1,6 +1,6 @@
 import type { CSSProperties, MouseEvent } from 'react'
 import MagazineShelf from './MagazineShelf'
-import { FadeIn, ScrollRow, ScrollText, StackList } from './MagazineMotion'
+import { FadeIn, FillText, ScrollRow, StackList } from './MagazineMotion'
 import { features, magazineUrl, photos } from './magazine-content'
 import type { Photo } from './magazine-content'
 import './MagazineLanding.css'
@@ -57,17 +57,29 @@ function MarqueeTile({ tile }: { tile: Tile }) {
   return <div className="jk-tile jk-tile-text" style={{ '--tile-bg': tile.bg, '--tile-fg': tile.fg } as CSSProperties}><small>{tile.label}</small><strong>{tile.title}</strong><span>PITCHSIDE</span></div>
 }
 
-function HeroShelf() {
-  return <section className="jk-hero" aria-labelledby="jk-hero-heading">
+// 매거진 모든 화면이 같은 상단 메뉴를 쓴다. 표지 화면에서는 섹션으로 스크롤하고, 그 밖의 화면에서는 페이지로 이동한다.
+export function MagazineTopNav({ page = 'home' }: { page?: 'home' | 'about' | 'detail' }) {
+  return <header className="jk-top">
     <FadeIn y={-20}>
       <nav className="jk-nav" aria-label="팬 매거진 메뉴">
-        <a href="#/magazine" onClick={jump('mag-about')}>About</a>
-        <a href="#/magazine" onClick={jump('mag-sections')}>Sections</a>
-        <a href="#/magazine" onClick={jump('mag-stories')}>Stories</a>
+        {page === 'home' ? <>
+          <a href="#/magazine" onClick={jump('mag-about')}>About</a>
+          <a href="#/magazine" onClick={jump('mag-shelf')}>Shelf</a>
+          <a href="#/magazine" onClick={jump('mag-stories')}>Stories</a>
+        </> : <>
+          <a href="#/magazine">Magazine</a>
+          <a href="#/magazine/about" aria-current={page === 'about' ? 'page' : undefined}>About</a>
+        </>}
         <a href="#/">Articles <span aria-hidden="true">↗</span></a>
       </nav>
     </FadeIn>
-    <h1 className="sr-only" id="jk-hero-heading">피치사이드 팬 매거진 2026 가을호</h1>
+    {page === 'home' && <h1 className="sr-only">피치사이드 팬 매거진 2026 가을호</h1>}
+  </header>
+}
+
+function ShelfSection() {
+  return <section className="jk-shelf" id="mag-shelf" aria-labelledby="jk-shelf-heading">
+    <h2 className="sr-only" id="jk-shelf-heading">이번 호 특집</h2>
     <MagazineShelf items={features} href={magazineUrl} />
   </section>
 }
@@ -93,24 +105,10 @@ function About() {
     <div className="jk-about-inner">
       <div className="jk-about-copy">
         <FadeIn y={40}><h2 className="hero-heading jk-heading" id="jk-about-heading">About us</h2></FadeIn>
-        <ScrollText className="jk-about-text" text={aboutText} />
+        <FillText className="jk-about-text" text={aboutText} />
       </div>
       <FadeIn delay={.2} y={20}><a className="jk-contact" href="#/magazine/about">매거진 소개 보기</a></FadeIn>
     </div>
-  </section>
-}
-
-function Sections() {
-  return <section className="jk-services" id="mag-sections" aria-labelledby="jk-sections-heading">
-    <FadeIn y={40}><h2 className="jk-heading" id="jk-sections-heading">Sections</h2></FadeIn>
-    <ol className="jk-service-list">{features.map((feature, index) => <li key={feature.id}>
-      <FadeIn delay={index * .1}>
-        <a className="jk-service" href={magazineUrl(feature.id)}>
-          <span className="jk-service-no" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-          <span className="jk-service-copy"><strong>{feature.label}<span> · {feature.name}</span></strong><span>{feature.description}</span></span>
-        </a>
-      </FadeIn>
-    </li>)}</ol>
   </section>
 }
 
@@ -133,10 +131,10 @@ function Stories() {
 
 export default function MagazineLanding() {
   return <div className="mag-landing">
-    <HeroShelf />
-    <Marquee />
+    <MagazineTopNav />
     <About />
-    <Sections />
+    <Marquee />
+    <ShelfSection />
     <Stories />
   </div>
 }

@@ -19,18 +19,12 @@
   -webkit-user-select: none;
 }
 
-.mag-shelf-index { position: relative; display: flex; align-self: center; margin-bottom: 20px; }
-.mag-shelf-index button { position: relative; z-index: 1; height: 26px; min-width: 46px; padding: 0 12px; margin-left: -1px; border: 1px solid var(--shelf-rule); border-radius: 0; background: none; color: inherit; font: 500 11px/1 Kanit, Pretendard, sans-serif; letter-spacing: .14em; transition: color .45s var(--shelf-ease); }
-.mag-shelf-index button::after { content: ''; position: absolute; inset: -9px 0; }
-.mag-shelf-index button:first-of-type { margin-left: 0; }
-.mag-shelf-index button.on { color: var(--shelf-on); }
-.mag-shelf-index .ind { position: absolute; left: 0; top: 0; width: 0; height: 26px; background: var(--shelf-accent); transition: width .6s var(--shelf-ease), transform .6s var(--shelf-ease); }
 
 .mag-shelf-wrap { position: relative; height: calc(var(--H) + 80px); }
 .mag-shelf { position: absolute; inset: 0; perspective: 2200px; perspective-origin: 50% 50%; touch-action: pan-y; outline: none; }
 .mag-shelf:focus-visible { outline: 1px solid var(--shelf-ink); outline-offset: -6px; }
 .mag-shelf-stage { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
-.shelf-tape { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
+.shelf-tape { cursor: pointer; position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
 .shelf-face { position: absolute; top: calc(var(--h) / -2); height: var(--h); overflow: hidden; border-radius: 2px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
 .shelf-face::after { content: ''; position: absolute; inset: 0; background: #000; opacity: var(--shade, 0); pointer-events: none; }
 .shelf-face img { max-width: none; width: 100%; height: 100%; object-fit: cover; }
@@ -69,27 +63,14 @@
 
 .mag-shelf-probe { position: absolute; left: -9999px; top: 0; width: 1px; height: var(--H); visibility: hidden; pointer-events: none; }
 
-/* 선반 위에서만 쓰는 원형 커서 */
-.mag-shelf-cursor { position: fixed; left: 0; top: 0; z-index: 150; width: 58px; height: 58px; margin: -29px 0 0 -29px; pointer-events: none; visibility: hidden; }
-.mag-shelf-cursor .ring { position: absolute; inset: 0; border: 1.5px solid var(--shelf-ink); border-radius: 50%; background-color: transparent; transition: transform .5s var(--shelf-ease), background-color .4s var(--shelf-ease), border-color .4s var(--shelf-ease); }
-.mag-shelf-cursor .dot { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--shelf-ink); transition: transform .4s var(--shelf-ease); }
-.mag-shelf-cursor .label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--shelf-on); font: 500 10px/1.3 Kanit, Pretendard, sans-serif; letter-spacing: .1em; transform: scale(0); transition: transform .45s var(--shelf-ease); }
-.mag-shelf-cursor[data-state=spine] .ring { transform: scale(.72); }
-.mag-shelf-cursor[data-state=button] .ring { transform: scale(.55); }
-.mag-shelf-cursor[data-state=button] .dot,.mag-shelf-cursor[data-state=open] .dot { transform: scale(0); }
-.mag-shelf-cursor[data-state=open] .ring { transform: scale(1.75); background-color: var(--shelf-accent); border-color: var(--shelf-accent); }
-.mag-shelf-cursor[data-state=open] .label { transform: scale(1); }
-@media (hover: hover) and (pointer: fine) {
-  .mag-shelf-section,.mag-shelf-section * { cursor: none; }
-  .mag-shelf-cursor[data-visible=true] { visibility: visible; }
-}
 
 /* 표지에서 자라 상세 지면이 되는 종이 */
-.mag-shelf-sheet { position: fixed; inset: 0; z-index: 200; background: var(--mag-paper); visibility: hidden; pointer-events: none; }
+.mag-shelf-sheet { position: fixed; inset: 0; z-index: 200; overflow: hidden; background: var(--mag-paper); visibility: hidden; pointer-events: none; }
+.mag-shelf-sheet > img { max-width: none; width: 100%; height: 100%; object-fit: cover; }
+.mag-shelf-sheet > .veil { position: absolute; inset: 0; background: var(--mag-paper); }
 
 @media (max-width: 640px) {
   .mag-shelf-section { --H: min(64vw, 42svh); }
-  .mag-shelf-index button { min-width: 40px; padding: 0 9px; font-size: 10px; }
   .mag-shelf-row { width: calc(100% - 12px); margin-top: 18px; }
   .shelf-title { font-size: 23px; }
   .shelf-sub { font-size: 12px; }

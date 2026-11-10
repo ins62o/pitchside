@@ -191,7 +191,7 @@ export default function App() {
     if (description) description.content = article?.summary || 'K리그부터 K3·K4리그, 대학·유스까지 우리 축구의 경기, 사람, 전술을 읽는 Pitchside. 경기장 가까이에서 우리 축구의 이야기를 전합니다.'
   }, [article, archive, path])
 
-  if (path === '/magazine' || path.startsWith('/magazine/') || (article && params.get('from') === '/magazine')) return <MagazinePage key={path} page={path === '/magazine' ? 'home' : path === '/magazine/about' ? 'about' : 'detail'} article={article} mainRef={main} themeControl={themeControl} />
+  if (path === '/magazine' || path.startsWith('/magazine/') || (article && params.get('from') === '/magazine')) return <MagazinePage key={path} page={path === '/magazine' ? 'home' : path === '/magazine/about' ? 'about' : 'detail'} article={article} mainRef={main} />
 
   return <div className="pitchside-reader">
     <a className="skip-link" href="#main-content" onClick={event => { event.preventDefault(); main.current?.focus() }}>본문으로 바로가기</a>

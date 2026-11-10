@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ReactNode, RefObject } from 'react'
-import MagazineLanding from './MagazineLanding'
+import type { RefObject } from 'react'
+import MagazineLanding, { MagazineTopNav } from './MagazineLanding'
 import { features, magazineUrl, photos } from './magazine-content'
 import type { Photo } from './magazine-content'
 import type { ReaderArticle } from './reader-data'
@@ -13,15 +13,8 @@ function MagazinePhoto({ photo, eager = false }: { photo: Photo; eager?: boolean
   return <div className="mag-photo">{failed ? <span className="mag-photo-placeholder" role="img" aria-label="사진 준비 중">pitchside.</span> : <><img src={photo.src} alt={photo.alt} loading={eager ? 'eager' : 'lazy'} fetchPriority={eager ? 'high' : 'auto'} onError={() => setFailed(true)} /><span className="photo-watermark" aria-hidden="true">pitchside.</span></>}</div>
 }
 
-function MagazineNav({ themeControl, about = false }: { themeControl: ReactNode; about?: boolean }) {
-  return <header className="mag-header">
-    <nav className="mag-nav" aria-label="팬 매거진 메뉴"><a href="#/">← 기사 홈</a><a href="#/magazine" className="mag-nav-center">FAN MAGAZINE</a><div><a href="#/magazine/about" aria-current={about ? 'page' : undefined}>매거진 소개</a>{themeControl}</div></nav>
-    <a href="#/magazine" className="mag-masthead" aria-label="Pitchside 매거진 홈">PITCHSIDE<span>경기장 바깥에도, 축구는 있다.</span></a>
-  </header>
-}
-
 function MagazineFooter() {
-  return <footer className="mag-footer"><a href="#/magazine" className="mag-footer-brand">PITCHSIDE</a><p>축구를 좋아하는 우리의 삶을 기록합니다.</p><div><a href="#/">기사 홈으로 ↗</a><small>© 2026 Pitchside</small></div></footer>
+  return <footer className="mag-footer"><a href="#/magazine" className="mag-footer-brand mag-gradient">PITCHSIDE</a><p>축구를 좋아하는 우리의 삶을 기록합니다.</p><div><a href="#/">기사 홈으로 ↗</a><small>© 2026 Pitchside</small></div></footer>
 }
 
 function MagazineText({ text }: { text: string }) {
@@ -47,7 +40,7 @@ function MagazineDetail({ article }: { article: ReaderArticle }) {
     return () => animations.forEach(animation => animation.cancel())
   }, [article.id])
   return <article className="mag-detail">
-    <header className="mag-detail-heading" ref={heading}><a href="#/magazine">매거진으로 돌아가기</a><p>{feature?.subtitle ?? article.kind}</p><h1>{feature?.title ?? article.title}</h1><div>{article.author} 기자 <span>·</span> {article.date.replaceAll('-', '.')}</div></header>
+    <header className="mag-detail-heading" ref={heading}><a href="#/magazine">← Magazine</a><p>{feature?.label ?? article.kind}</p><h1 className="mag-gradient">{feature?.title ?? article.title}</h1>{feature && <p className="mag-detail-sub">{feature.subtitle}</p>}<div>{article.author} 기자 <span>·</span> {article.date.replaceAll('-', '.')}</div></header>
     <figure className="mag-detail-hero" ref={hero}><MagazinePhoto photo={wide} eager /><figcaption>{article.image?.caption}</figcaption></figure>
     <QuoteShare source={source}>
       <div className="mag-detail-intro"><p>{article.summary}</p><span aria-hidden="true">✳</span></div>
@@ -58,20 +51,32 @@ function MagazineDetail({ article }: { article: ReaderArticle }) {
         {index === 1 && <figure className="mag-inline-image"><MagazinePhoto photo={cover} /><figcaption>관중석 안팎에서 이어지는 우리의 축구.</figcaption></figure>}
       </section>)}</div>
     </QuoteShare>
-    <div className="mag-detail-end"><p>{article.author} 기자</p><a href="#/magazine">다른 이야기 펼쳐보기 ↗</a></div>
-    <aside className="mag-next-story"><p>함께 읽는 이야기</p><a href={magazineUrl(features.find(item => item.id !== article.id)!.id)}>{features.find(item => item.id !== article.id)!.title}<span aria-hidden="true">↗</span></a></aside>
+    <div className="mag-detail-end"><p>{article.author} 기자</p><a className="jk-ghost" href="#/magazine">다른 이야기 펼쳐보기</a></div>
+    <aside className="mag-next-story"><p>Next story</p><a href={magazineUrl(features.find(item => item.id !== article.id)!.id)}><span className="mag-gradient">{features.find(item => item.id !== article.id)!.title}</span><span aria-hidden="true">↗</span></a></aside>
   </article>
 }
 
 function MagazineAbout() {
-  return <article className="mag-about"><header><p>ABOUT PITCHSIDE</p><h1>축구를 좋아하는<br />우리의 삶을 기록합니다.</h1></header><MagazinePhoto photo={photos.fans} eager /><div className="mag-about-body"><p>승패만으로는 다 담을 수 없는 축구가 있습니다. 첫 유니폼을 입던 날, 원정 버스에서 만난 사람, 목이 쉬도록 부른 응원가.</p><p>피치사이드 팬 매거진은 경기장 곁에서 만나는 사람들의 이야기를 모은 지면입니다. 축구를 좋아하는 우리의 시선으로 그라운드 바깥의 시간을 바라봅니다.</p><h2>경기장 가까이, 사람들 곁에서.</h2><p>멀리서 평가하기보다 곁에서 바라봅니다. 응원하는 팀이 달라도 같은 토요일을 보내는 사람들의 이야기를 나란히 놓습니다.</p><a href="#/magazine">이번 호 읽으러 가기 ↗</a></div></article>
+  return <article className="mag-about"><header><p>ABOUT PITCHSIDE</p><h1 className="mag-gradient">축구를 좋아하는<br />우리의 삶을 기록합니다.</h1></header><MagazinePhoto photo={photos.fans} eager /><div className="mag-about-body"><p>승패만으로는 다 담을 수 없는 축구가 있습니다. 첫 유니폼을 입던 날, 원정 버스에서 만난 사람, 목이 쉬도록 부른 응원가.</p><p>피치사이드 팬 매거진은 경기장 곁에서 만나는 사람들의 이야기를 모은 지면입니다. 축구를 좋아하는 우리의 시선으로 그라운드 바깥의 시간을 바라봅니다.</p><h2>경기장 가까이, 사람들 곁에서.</h2><p>멀리서 평가하기보다 곁에서 바라봅니다. 응원하는 팀이 달라도 같은 토요일을 보내는 사람들의 이야기를 나란히 놓습니다.</p><a className="jk-contact" href="#/magazine">이번 호 읽으러 가기</a></div></article>
 }
 
-export default function MagazinePage({ page, article, mainRef, themeControl }: { page: 'home' | 'about' | 'detail'; article?: ReaderArticle; mainRef: RefObject<HTMLElement | null>; themeControl: ReactNode }) {
+export default function MagazinePage({ page, article, mainRef }: { page: 'home' | 'about' | 'detail'; article?: ReaderArticle; mainRef: RefObject<HTMLElement | null> }) {
   const landing = page === 'home'
+  // 매거진은 사이트 테마와 관계없이 어두운 지면이므로 스크롤 끝의 바탕과 브라우저 색도 맞춘다.
+  useEffect(() => {
+    const root = document.documentElement
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    const previous = meta?.content
+    root.classList.add('magazine-root')
+    meta?.setAttribute('content', '#0C0C0C')
+    return () => {
+      root.classList.remove('magazine-root')
+      if (meta && previous) meta.content = previous
+    }
+  }, [])
   return <div className={landing ? 'magazine is-landing' : 'magazine'}>
     <a className="skip-link" href="#magazine-content" onClick={event => { event.preventDefault(); mainRef.current?.focus() }}>본문으로 바로가기</a>
-    {!landing && <MagazineNav themeControl={themeControl} about={page === 'about'} />}
+    {!landing && <MagazineTopNav page={page} />}
     <main id="magazine-content" ref={mainRef} tabIndex={-1}>{landing ? <MagazineLanding /> : page === 'about' ? <MagazineAbout /> : article ? <MagazineDetail article={article} /> : <section className="mag-missing"><h1>이야기를 찾을 수 없습니다.</h1><a href="#/magazine">매거진으로 돌아가기 ↗</a></section>}</main>
     <MagazineFooter />
   </div>

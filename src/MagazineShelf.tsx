@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import './MagazineShelf.css'
 
 export type ShelfItem = { id: string; title: string; subtitle: string; label: string; photo: { src: string; alt: string } }
-type Controls = { step: (n: number) => void; go: (index: number) => void; open: () => void }
+type Controls = { step: (n: number) => void; open: () => void }
 
 // 인쇄된 책등 색. 사진처럼 테마와 관계없이 같은 색을 유지한다.
 const SPINE_COLORS = [
@@ -55,11 +55,8 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
     const shelf = q<HTMLElement>('.mag-shelf')
     const stage = q<HTMLElement>('.mag-shelf-stage')
     const play = q<HTMLElement>('.mag-shelf-play')
-    const cursor = q<HTMLElement>('.mag-shelf-cursor')
     const sheet = q<HTMLElement>('.mag-shelf-sheet')
     const probe = q<HTMLElement>('.mag-shelf-probe')
-    const indicator = q<HTMLElement>('.mag-shelf-index .ind')
-    const tabs = [...section.querySelectorAll<HTMLElement>('.mag-shelf-index button')]
     const masks = [...section.querySelectorAll<HTMLElement>('.shelf-mask')]
     const tapes: Tape[] = [...stage.querySelectorAll<HTMLElement>('.shelf-tape')].map((el, v) => ({
       v, el, sp: el.children[0] as HTMLElement, cv: el.children[1] as HTMLElement,
@@ -75,7 +72,7 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
     let s = count * Math.floor(copies / 2) + start
     let T = s
     let hover = -1, current = -1
-    let mx = 0, my = 0, cx = 0, cy = 0, inside = false, overButton = false
+    let mx = 0, my = 0, inside = false
     let tiltX = 0, tiltY = 0, dragging = false, suppressClick = false, opening = false
     let last = performance.now(), raf = 0, running = false, wheelTimer = 0
     let down: { id: number; x: number; T0: number } | null = null
@@ -107,22 +104,12 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       span.animate([{ transform: `translateY(${dir * 105}%)` }, { transform: 'translateY(0)' }], { duration: 650, easing: EASE, fill: 'both' })
     }
 
-    function placeIndicator(index: number, instant: boolean) {
-      const tab = tabs[index]
-      if (!tab) return
-      if (instant) indicator.style.transition = 'none'
-      indicator.style.width = `${tab.offsetWidth}px`
-      indicator.style.transform = `translateX(${tab.offsetLeft}px)`
-      if (instant) { void indicator.offsetWidth; indicator.style.transition = '' }
-    }
-
     function show(index: number, dir: number, instant: boolean) {
       current = index
       const item = items[index]
       swap(masks[0], item.title, dir, instant)
       swap(masks[1], item.subtitle, dir, instant)
       swap(masks[2], `${pad(index)} · ${item.label}`, dir, instant)
-      placeIndicator(index, instant)
       setActive(index)
     }
 
@@ -152,8 +139,11 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       const index = mod(Math.round(s), count)
       saveStart(index)
       const rect = coverRect()
+      sheet.querySelector('img')!.src = items[index].photo.src
       sheet.style.transformOrigin = `${rect.x}px ${rect.y}px`
       sheet.style.visibility = 'visible'
+      // 표지 사진이 화면 전체로 커지면서 매거진 지면 색으로 어두워진다.
+      sheet.querySelector('.veil')!.animate([{ opacity: 0.15 }, { opacity: 1 }], { duration: reduce ? 1 : 1050, easing: 'cubic-bezier(.6,0,.4,1)', fill: 'both' })
       const animation = sheet.animate(
         [{ clipPath: rect.inset, transform: `rotate(${LEAN}deg)` }, { clipPath: 'inset(0px 0px 0px 0px round 0px)', transform: 'rotate(0deg)' }],
         { duration: reduce ? 1 : 1050, easing: SHEET_EASE, fill: 'both' })
@@ -161,14 +151,7 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
     }
 
     const step = (n: number) => { if (!opening) T = Math.round(T) + n }
-    const go = (index: number) => {
-      if (opening) return
-      const from = Math.round(T)
-      let diff = mod(index - from, count)
-      if (diff > count / 2) diff -= count
-      T = from + diff
-    }
-    controls.current = { step, go, open }
+    controls.current = { step, open }
 
     function frame(now: number) {
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -221,14 +204,6 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       const playScale = opening ? 0 : smooth(clamp01(1 - Math.abs(T - s) * 3))
       play.style.transform = `scale(${playScale.toFixed(4)})`
       play.style.pointerEvents = playScale > 0.5 ? '' : 'none'
-
-      const cursorFollow = 1 - Math.exp(-16 * dt)
-      cx += (mx - cx) * cursorFollow
-      cy += (my - cy) * cursorFollow
-      cursor.style.transform = `translate3d(${cx.toFixed(2)}px,${cy.toFixed(2)}px,0)`
-      const overSpine = hover !== -1 && Math.abs(wrapR(hover - s)) > 0.5
-      const state = opening ? '' : onCover ? 'open' : overSpine ? 'spine' : overButton ? 'button' : ''
-      if (cursor.dataset.state !== state) cursor.dataset.state = state
 
       raf = requestAnimationFrame(frame)
     }
@@ -288,24 +263,27 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
     listen(section, 'pointerenter', event => {
       if (event.pointerType !== 'mouse') return
       inside = true
-      mx = cx = event.clientX
-      my = cy = event.clientY
-      cursor.dataset.visible = 'true'
+      mx = event.clientX
+      my = event.clientY
     })
-    listen(section, 'pointerleave', () => { inside = false; hover = -1; delete cursor.dataset.visible })
-    listen(section, 'pointerover', event => {
-      const target = event.target instanceof Element ? event.target : null
-      overButton = !!target?.closest('button') && !target.closest('.mag-shelf')
-    })
+    listen(section, 'pointerleave', () => { inside = false; hover = -1 })
 
-    // 가로 스크롤만 선반을 넘기고, 세로 스크롤은 페이지 스크롤로 남긴다.
+    // 책 위에서 세로 휠은 한 번 굴릴 때마다 한 권씩 넘기고, 가로 스크롤은 연속으로 미끄러진다.
+    let wheelSum = 0, wheelLocked = false
     listen(shelf, 'wheel', event => {
-      if (opening || Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return
+      if (opening) return
       event.preventDefault()
       const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1
-      T += event.deltaX * unit / (ws + gap) * 0.5
+      const dx = event.deltaX * unit, dy = event.deltaY * unit
       window.clearTimeout(wheelTimer)
-      wheelTimer = window.setTimeout(() => { T = Math.round(T) }, 160)
+      wheelTimer = window.setTimeout(() => { wheelSum = 0; wheelLocked = false; T = Math.round(T) }, 160)
+      if (Math.abs(dx) > Math.abs(dy)) { T += dx / (ws + gap) * 0.5; return }
+      if (wheelLocked) return
+      wheelSum += dy
+      if (Math.abs(wheelSum) < 30) return
+      step(Math.sign(wheelSum))
+      wheelLocked = true
+      wheelSum = 0
     }, { passive: false })
 
     listen(section, 'keydown', event => {
@@ -314,8 +292,9 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       else if (event.key === 'Enter' && event.target === shelf) { event.preventDefault(); open() }
     })
 
-    listen(window, 'resize', () => { measure(); placeIndicator(current, true) })
-    document.fonts?.ready.then(() => { if (current >= 0) placeIndicator(current, true) })
+    // 창 크기뿐 아니라 svh 기준 높이가 바뀔 때도 다시 잰다.
+    const sizeObserver = new ResizeObserver(() => measure())
+    sizeObserver.observe(probe)
 
     const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) run(); else stop() })
     observer.observe(section)
@@ -327,18 +306,15 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
     return () => {
       stop()
       observer.disconnect()
+      sizeObserver.disconnect()
       window.clearTimeout(wheelTimer)
       cleanups.forEach(cleanup => cleanup())
-      sheet.getAnimations().forEach(animation => animation.cancel())
+      sheet.getAnimations({ subtree: true }).forEach(animation => animation.cancel())
       controls.current = null
     }
   }, [items, href, count, copies, total, start])
 
   return <section ref={root} className="mag-shelf-section" aria-label="이번 호 이야기 선반">
-    <div className="mag-shelf-index" role="group" aria-label="이야기 선택">
-      <span className="ind" aria-hidden="true" />
-      {items.map((item, index) => <button key={item.id} type="button" className={active === index ? 'on' : undefined} aria-pressed={active === index} aria-label={`${pad(index)} ${item.title}`} onClick={() => controls.current?.go(index)}>{pad(index)}</button>)}
-    </div>
     <div className="mag-shelf-wrap">
       <div className="mag-shelf" tabIndex={0} role="group" aria-roledescription="선반" aria-label="이야기 선반. 좌우 화살표로 넘기고 Enter로 펼칩니다.">
         <div className="mag-shelf-stage" aria-hidden="true">
@@ -386,7 +362,6 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       </button>
     </div>
     <div className="mag-shelf-probe" aria-hidden="true" />
-    <div className="mag-shelf-cursor" aria-hidden="true"><span className="ring" /><span className="dot" /><span className="label"><span>OPEN</span><span>펼치기</span></span></div>
-    <div className="mag-shelf-sheet" aria-hidden="true" />
+    <div className="mag-shelf-sheet" aria-hidden="true"><img alt="" /><span className="veil" /></div>
   </section>
 }

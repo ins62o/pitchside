@@ -52,23 +52,22 @@ export function Magnet({ children, className = '', padding = 150, strength = 3 }
   return <div ref={element} className={className} style={{ willChange: 'transform' }}>{children}</div>
 }
 
-export function ScrollText({ text, className = '' }: { text: string; className?: string }) {
+// 화면에 들어오면 스크롤과 관계없이 글자를 앞에서부터 차례로 채운다.
+export function FillText({ text, className = '', step = 18, delay = 300 }: { text: string; className?: string; step?: number; delay?: number }) {
   const element = useRef<HTMLParagraphElement>(null)
+  const [filled, setFilled] = useState(false)
   useEffect(() => {
     const target = element.current
-    if (!target || reducedMotion()) return
-    const letters = target.querySelectorAll<HTMLElement>('[data-letter]')
-    return onScrollFrame(() => {
-      const box = target.getBoundingClientRect()
-      const height = window.innerHeight
-      // 문단이 화면을 다 지나기 전에 읽을 수 있도록 진행의 75% 지점에서 모두 밝힌다.
-      const progress = clamp((height * .8 - box.top) / (box.height + height * .6) / .75)
-      letters.forEach((letter, index) => {
-        letter.style.opacity = String(.2 + .8 * clamp(progress * letters.length - index))
-      })
-    })
-  }, [text])
-  return <p ref={element} className={className}><span className="sr-only">{text}</span><span aria-hidden="true">{Array.from(text).map((letter, index) => <span data-letter key={index}>{letter}</span>)}</span></p>
+    if (!target) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      setFilled(true)
+      observer.disconnect()
+    }, { threshold: .4 })
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [])
+  return <p ref={element} className={`mag-fill ${className}`} data-filled={filled}><span className="sr-only">{text}</span><span aria-hidden="true">{Array.from(text).map((letter, index) => <span key={index} style={{ transitionDelay: `${delay + index * step}ms` }}>{letter}</span>)}</span></p>
 }
 
 export function ScrollRow({ children, direction = 1 }: { children: ReactNode; direction?: 1 | -1 }) {
