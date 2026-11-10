@@ -1,6 +1,6 @@
 import type { CSSProperties, MouseEvent } from 'react'
 import MagazineShelf from './MagazineShelf'
-import { FadeIn, FillText, ScrollRow, StackList } from './MagazineMotion'
+import { AutoRow, FadeIn, FillText, StackList } from './MagazineMotion'
 import { features, magazineUrl, photos } from './magazine-content'
 import type { Photo } from './magazine-content'
 import './MagazineLanding.css'
@@ -86,8 +86,8 @@ function ShelfSection() {
 
 function Marquee() {
   return <section className="jk-marquee" aria-label="매거진 사진">
-    <ScrollRow direction={1}>{firstRow.map((tile, index) => <MarqueeTile tile={tile} key={index} />)}</ScrollRow>
-    <ScrollRow direction={-1}>{secondRow.map((tile, index) => <MarqueeTile tile={tile} key={index} />)}</ScrollRow>
+    <AutoRow direction={1} duration={76}>{firstRow.map((tile, index) => <MarqueeTile tile={tile} key={index} />)}</AutoRow>
+    <AutoRow direction={-1} duration={69}>{secondRow.map((tile, index) => <MarqueeTile tile={tile} key={index} />)}</AutoRow>
   </section>
 }
 
@@ -114,11 +114,11 @@ function About() {
 
 function Stories() {
   return <section className="jk-projects" id="mag-stories" aria-labelledby="jk-stories-heading">
-    <div className="jk-fit"><FadeIn y={40}><h2 className="hero-heading jk-heading" id="jk-stories-heading">Stories</h2></FadeIn></div>
+    <FadeIn y={40}><h2 className="hero-heading jk-heading" id="jk-stories-heading">Stories</h2></FadeIn>
     <StackList>{stories.map(({ feature, images: [top, bottom, tall] }, index) => <article className="jk-card" key={feature.id} aria-labelledby={`jk-story-${feature.id}`}>
       <div className="jk-card-top">
         <span className="jk-card-no" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-        <div className="jk-card-meta"><p>{feature.label}</p><h3 id={`jk-story-${feature.id}`}>{feature.title}</h3><span>{feature.subtitle}</span></div>
+        <div className="jk-card-meta"><h3 id={`jk-story-${feature.id}`}>{feature.title}</h3><span>{feature.subtitle}</span></div>
         <a className="jk-ghost" href={magazineUrl(feature.id)} aria-label={`${feature.title} 이야기 읽기`}>이야기 읽기</a>
       </div>
       <div className="jk-card-grid">

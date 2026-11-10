@@ -70,18 +70,9 @@ export function FillText({ text, className = '', step = 18, delay = 300 }: { tex
   return <p ref={element} className={`mag-fill ${className}`} data-filled={filled}><span className="sr-only">{text}</span><span aria-hidden="true">{Array.from(text).map((letter, index) => <span key={index} style={{ transitionDelay: `${delay + index * step}ms` }}>{letter}</span>)}</span></p>
 }
 
-export function ScrollRow({ children, direction = 1 }: { children: ReactNode; direction?: 1 | -1 }) {
-  const row = useRef<HTMLDivElement>(null)
-  const track = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (reducedMotion()) return
-    return onScrollFrame(() => {
-      if (!row.current || !track.current) return
-      const offset = (window.innerHeight - row.current.getBoundingClientRect().top) * .3
-      track.current.style.transform = `translate3d(calc(-33.333% + ${direction * offset}px),0,0)`
-    })
-  }, [direction])
-  return <div className="mag-row" ref={row}><div className="mag-row-track" ref={track}>{[0, 1, 2].map(copy => <div className="mag-row-set" key={copy} aria-hidden={copy > 0 || undefined}>{children}</div>)}</div></div>
+// 사진 줄은 스크롤과 관계없이 자동으로 흐른다. 같은 묶음을 두 번 이어 붙여 -50%까지 움직이면 끊김 없이 반복된다.
+export function AutoRow({ children, direction = 1, duration = 60 }: { children: ReactNode; direction?: 1 | -1; duration?: number }) {
+  return <div className="mag-auto-row" style={{ '--row-duration': `${duration}s` } as CSSProperties}><div className="mag-auto-track" data-direction={direction > 0 ? 'right' : 'left'}>{[0, 1].map(copy => <div className="mag-auto-set" key={copy} aria-hidden={copy > 0 || undefined}>{children}</div>)}</div></div>
 }
 
 export function StackList({ children }: { children: ReactNode }) {

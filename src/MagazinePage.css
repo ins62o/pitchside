@@ -10,6 +10,9 @@
   --mag-accent: #D58BE0;
   --mag-serif: 'Gowun Batang','Iowan Old Style',Georgia,serif;
   --mag-radius: 40px;
+  /* 매거진의 모든 섹션은 스토리 카드와 같은 폭(최대 1400px, 좌우 여백 20·32·40px)을 쓴다. */
+  --mag-gutter: 20px;
+  --mag-width: min(1400px, calc(100% - 2 * var(--mag-gutter)));
   /* 문장 카드 등 공용 컴포넌트가 읽는 변수 */
   --line: var(--mag-line);
   --muted: var(--mag-muted);
@@ -28,7 +31,7 @@
 .magazine .quote-export .quote-primary { background: var(--mag-ink); border-color: var(--mag-ink); color: var(--mag-paper); }
 .mag-gradient { background: linear-gradient(180deg, #646973 0%, #BBCCD7 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 
-.mag-footer,.mag-detail,.mag-about,.mag-missing { width: min(1400px,calc(100% - 96px)); margin-inline: auto; }
+.mag-footer,.mag-detail,.mag-about,.mag-missing { width: var(--mag-width); margin-inline: auto; }
 .jk-nav a[aria-current=page] { text-decoration: underline; text-underline-offset: 8px; text-decoration-thickness: 2px; }
 
 .mag-photo { position: relative; width: 100%; height: 100%; overflow: hidden; background: #1A1C1F; }
@@ -36,12 +39,9 @@
 .mag-photo-placeholder { width: 100%; height: 100%; min-height: 260px; display: grid; place-items: center; font: italic 700 40px Arial,sans-serif; color: var(--mag-ink); }
 .mag-detail-hero .mag-photo,.mag-inline-image .mag-photo,.mag-about > .mag-photo { border-radius: var(--mag-radius); }
 
-.mag-footer { padding-block: 40px 28px; border-top: 1px solid var(--mag-line); }
+.mag-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 40px; border-top: 1px solid var(--mag-line); }
 .mag-footer-brand { font: 900 34px/1.1 Kanit,sans-serif; letter-spacing: -.02em; }
-.mag-footer > p { font: 300 13px/1.6 Pretendard,sans-serif; color: var(--mag-muted); margin-top: 12px; }
-.mag-footer > div { display: flex; justify-content: space-between; gap: 16px; margin-top: 36px; font-size: 12px; color: var(--mag-muted); letter-spacing: .04em; }
-.mag-footer > div > a { padding-block: 10px; }
-.mag-footer small { align-self: center; }
+.mag-footer small { font: 400 12px/1.4 Kanit,sans-serif; letter-spacing: .04em; color: var(--mag-muted); white-space: nowrap; }
 
 /* 상세 */
 .mag-detail-heading { max-width: 960px; margin: 56px auto 64px; text-align: center; }
@@ -66,7 +66,7 @@
 .mag-body blockquote { padding-block: 32px; margin-block: 48px; }
 .mag-body blockquote > p { font: 400 29px/1.9 var(--mag-serif); word-break: keep-all; }
 .mag-body cite { display: block; font: normal 12px/1.7 Pretendard,sans-serif; color: var(--mag-muted); margin-top: 22px; }
-.mag-inline-image { width: min(1040px,calc(100vw - 96px)); position: relative; left: 50%; transform: translateX(-50%); margin-block: 64px; }
+.mag-inline-image { width: min(1040px, calc(100vw - 2 * var(--mag-gutter))); position: relative; left: 50%; transform: translateX(-50%); margin-block: 64px; }
 .mag-inline-image .mag-photo { height: min(65vw,640px); }
 .mag-detail-end { max-width: 700px; margin: 24px auto 96px; display: flex; justify-content: space-between; align-items: center; gap: 16px; font: 400 13px/1.5 Pretendard,sans-serif; color: var(--mag-muted); }
 .mag-next-story { border-top: 1px solid var(--mag-line); padding: 48px 0 72px; }
@@ -86,14 +86,11 @@
 .mag-missing { padding-block: 80px; text-align: center; }
 .mag-missing a { display: inline-block; padding: 24px; text-decoration: underline; }
 
-@media(min-width: 640px) { .magazine { --mag-radius: 50px; } }
-@media(min-width: 768px) { .magazine { --mag-radius: 60px; } }
-@media(max-width: 1024px) {
-  .mag-footer,.mag-detail,.mag-about,.mag-missing { width: calc(100% - 64px); }
-}
+@media(min-width: 640px) { .magazine { --mag-radius: 50px; --mag-gutter: 32px; } }
+@media(min-width: 768px) { .magazine { --mag-radius: 60px; --mag-gutter: 40px; } }
 @media(max-width: 640px) {
-  .mag-footer,.mag-detail,.mag-about,.mag-missing { width: calc(100% - 40px); }
-  .mag-footer { padding-top: 32px; }
+  .mag-footer { padding-block: 32px; }
+  .mag-footer-brand { font-size: 26px; }
   .mag-detail-heading { margin-block: 32px 40px; }
   .mag-detail-heading > p:first-of-type { margin-top: 20px; font-size: 11px; }
   .mag-detail-heading h1 { font-size: 40px; }
@@ -109,7 +106,7 @@
   .mag-body section > p { margin-bottom: 26px; }
   .mag-body blockquote { margin-block: 32px; padding-block: 20px; }
   .mag-body blockquote > p { font-size: 24px; }
-  .mag-inline-image { width: calc(100vw - 40px); margin-block: 40px; }
+  .mag-inline-image { margin-block: 40px; }
   .mag-inline-image .mag-photo { height: 85vw; }
   .mag-detail-end { margin-bottom: 56px; flex-direction: column; align-items: flex-start; }
   .mag-next-story { padding-block: 32px 48px; }

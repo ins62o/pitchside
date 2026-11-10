@@ -20,13 +20,14 @@
 }
 
 
-.mag-shelf-wrap { position: relative; height: calc(var(--H) + 80px); }
+.mag-shelf-wrap { position: relative; height: calc(var(--H) + 80px); contain: layout style; }
 .mag-shelf { position: absolute; inset: 0; perspective: 2200px; perspective-origin: 50% 50%; touch-action: pan-y; outline: none; }
 .mag-shelf:focus-visible { outline: 1px solid var(--shelf-ink); outline-offset: -6px; }
 .mag-shelf-stage { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
 .shelf-tape { cursor: pointer; position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
 .shelf-face { position: absolute; top: calc(var(--h) / -2); height: var(--h); overflow: hidden; border-radius: 2px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.shelf-face::after { content: ''; position: absolute; inset: 0; background: #000; opacity: var(--shade, 0); pointer-events: none; }
+/* 책 음영 겸 양끝 페이드. 바탕색으로 덮어 가장자리 책이 테두리나 단면 없이 배경 속으로 사라지게 한다. */
+.shelf-veil { position: absolute; inset: 0; z-index: 1; border-radius: inherit; background: var(--shelf-bg); opacity: 0; pointer-events: none; }
 .shelf-face img { max-width: none; width: 100%; height: 100%; object-fit: cover; }
 
 /* 책등: 정면, 폭 --ws */
@@ -34,7 +35,9 @@
 .shelf-sp .no { font: 400 calc(var(--ws) * .2)/1 'Iowan Old Style', Georgia, serif; letter-spacing: .04em; }
 .shelf-sp .ph { display: block; flex: none; width: calc(var(--ws) * .74); aspect-ratio: 3/4; overflow: hidden; }
 .shelf-sp .tt { flex: 1; min-height: 0; overflow: hidden; writing-mode: vertical-rl; white-space: nowrap; font: 400 calc(var(--ws) * .38)/1 var(--mag-serif); letter-spacing: .1em; }
-.shelf-sp .mk { padding: calc(var(--ws) * .06) calc(var(--ws) * .1); border: 1px solid currentColor; font: italic 700 calc(var(--ws) * .2)/1 Arial, sans-serif; }
+/* p. 배지는 고정 크기 상자 안에서 가로·세로 가운데에 놓는다. Arial 굵은 이탤릭 ‘p.’의 잉크는 글자 상자보다 왼쪽·아래로 치우쳐 있어(가로 −4%, 세로 +18%) 그만큼 되돌린다. */
+.shelf-sp .mk { flex: none; display: grid; place-items: center; width: calc(var(--ws) * .4); height: calc(var(--ws) * .34); border: 1px solid currentColor; font: italic 700 calc(var(--ws) * .19)/1 Arial, sans-serif; }
+.shelf-sp .mk::before { content: 'p.'; display: block; transform: translate(4%, -18%); }
 
 /* 표지: 오른쪽 옆면, 폭 --d(A4 비율) */
 /* 회전한 면에 overflow: hidden을 주면 Chrome에서 클릭 판정이 사라지므로 표지는 잘라내지 않는다. */
@@ -59,7 +62,6 @@
 .shelf-mask > span + span { position: absolute; left: 0; top: 0; width: 100%; }
 .shelf-title { font: 400 30px/1.4 var(--mag-serif); letter-spacing: -.02em; }
 .shelf-sub { font: 400 13px/1.5 Pretendard, sans-serif; color: var(--shelf-sub); }
-.shelf-meta { font: 500 11px/1.4 Kanit, Pretendard, sans-serif; letter-spacing: .16em; color: var(--shelf-muted); }
 
 .mag-shelf-probe { position: absolute; left: -9999px; top: 0; width: 1px; height: var(--H); visibility: hidden; pointer-events: none; }
 

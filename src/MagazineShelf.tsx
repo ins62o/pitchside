@@ -37,7 +37,7 @@ function saveStart(index: number) {
   try { sessionStorage.setItem(STORE, String(index)) } catch { /* 저장할 수 없어도 선반은 동작한다 */ }
 }
 
-type Tape = { v: number; el: HTMLElement; sp: HTMLElement; cv: HTMLElement; lift: number; shown: boolean; tf: string; z: number; shadeSpine: number; shadeCover: number }
+type Tape = { v: number; el: HTMLElement; cv: HTMLElement; spVeil: HTMLElement; cvVeil: HTMLElement; lift: number; shown: boolean; tf: string; z: number; shadeSpine: number; shadeCover: number }
 
 export default function MagazineShelf({ items, href }: { items: ShelfItem[]; href: (id: string) => string }) {
   const count = items.length
@@ -59,7 +59,8 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
     const probe = q<HTMLElement>('.mag-shelf-probe')
     const masks = [...section.querySelectorAll<HTMLElement>('.shelf-mask')]
     const tapes: Tape[] = [...stage.querySelectorAll<HTMLElement>('.shelf-tape')].map((el, v) => ({
-      v, el, sp: el.children[0] as HTMLElement, cv: el.children[1] as HTMLElement,
+      v, el, cv: el.children[1] as HTMLElement,
+      spVeil: el.children[0].querySelector<HTMLElement>('.shelf-veil')!, cvVeil: el.children[1].querySelector<HTMLElement>('.shelf-veil')!,
       lift: 0, shown: true, tf: '', z: -1, shadeSpine: -1, shadeCover: -1,
     }))
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -74,10 +75,21 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
     let hover = -1, current = -1
     let mx = 0, my = 0, inside = false
     let tiltX = 0, tiltY = 0, dragging = false, suppressClick = false, opening = false
-    let last = performance.now(), raf = 0, running = false, wheelTimer = 0
+    let last = performance.now(), raf = 0, running = false, wheelTimer = 0, lastPlay = ''
     let down: { id: number; x: number; T0: number } | null = null
 
+    // 선반 위치는 레이아웃이 바뀔 때만 읽어 두고, 매 프레임에는 스크롤 값으로 계산해 강제 레이아웃을 피한다.
+    let boxLeft = 0, boxWidth = 0, boxDocTop = 0, boxHeight = 0
+    function measureBox() {
+      const box = shelf.getBoundingClientRect()
+      boxLeft = box.left
+      boxWidth = box.width
+      boxHeight = box.height
+      boxDocTop = box.top + window.scrollY
+    }
+
     function measure() {
+      measureBox()
       H = probe.getBoundingClientRect().height
       ws = H * 0.15
       d = H * 210 / 297
@@ -109,7 +121,6 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       const item = items[index]
       swap(masks[0], item.title, dir, instant)
       swap(masks[1], item.subtitle, dir, instant)
-      swap(masks[2], `${pad(index)} · ${item.label}`, dir, instant)
       setActive(index)
     }
 
@@ -165,19 +176,21 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       const index = mod(Math.round(s), count)
       if (index !== current) show(index, Math.sign(T - s) || 1, false)
 
-      const box = shelf.getBoundingClientRect()
-      const centerX = box.left + box.width / 2, centerY = box.top + box.height / 2
+      const centerX = boxLeft + boxWidth / 2, centerY = boxDocTop - window.scrollY + boxHeight / 2
       const settled = Math.abs(T - s) < 0.3
       const onCover = inside && !opening && settled && Math.abs(mx - centerX) < 0.55 * d && Math.abs(my - centerY) < 0.55 * H
 
-      const targetY = onCover ? (mx - centerX) / (0.55 * d) * 9 : inside ? (mx - centerX) / box.width * 5 : 0
+      const targetY = onCover ? (mx - centerX) / (0.55 * d) * 9 : inside ? (mx - centerX) / boxWidth * 5 : 0
       const targetX = onCover ? -(my - centerY) / (H / 2) * 6 : 0
       const tiltFollow = 1 - Math.exp(-7 * dt)
       tiltY += (targetY - tiltY) * tiltFollow
       tiltX += (targetX - tiltX) * tiltFollow
 
       const liftFollow = reduce ? 1 : 1 - Math.exp(-12 * dt)
-      const limit = box.width / 2 + 1.5 * d
+      const limit = boxWidth / 2 + 1.5 * d
+      // 양끝 페이드 구간: 책의 바깥 모서리가 이 구간에 들어오면 가장자리에 가까울수록 바탕색으로 덮이고,
+      // 선반 끝에 닿는 순간 완전히 사라져 잘린 단면이 보이지 않는다.
+      const fadeWidth = Math.min(220, Math.max(80, boxWidth * 0.16)), fadeStart = boxWidth / 2 - fadeWidth
       for (const tape of tapes) {
         const r = wrapR(tape.v - s)
         const x = F(r)
@@ -196,14 +209,16 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
         if (tf !== tape.tf) { tape.el.style.transform = tf; tape.tf = tf }
         const z = Math.round(100 - Math.abs(r) * 4)
         if (z !== tape.z) { tape.el.style.zIndex = String(z); tape.z = z }
-        const shadeSpine = Math.round(o * 550) / 1000, shadeCover = Math.round((1 - o) * 500) / 1000
-        if (shadeSpine !== tape.shadeSpine) { tape.sp.style.setProperty('--shade', String(shadeSpine)); tape.shadeSpine = shadeSpine }
-        if (shadeCover !== tape.shadeCover) { tape.cv.style.setProperty('--shade', String(shadeCover)); tape.shadeCover = shadeCover }
+        const edge = smooth(clamp01((Math.abs(x) + ws / 2 - fadeStart) / fadeWidth))
+        const shadeSpine = Math.round(Math.max(o * 0.55, edge) * 1000) / 1000, shadeCover = Math.round(Math.max((1 - o) * 0.5, edge) * 1000) / 1000
+        // 음영은 변수 대신 덮개 요소의 opacity로 바꿔 스타일 재계산 없이 합성 단계에서 처리한다.
+        if (shadeSpine !== tape.shadeSpine) { tape.spVeil.style.opacity = String(shadeSpine); tape.shadeSpine = shadeSpine }
+        if (shadeCover !== tape.shadeCover) { tape.cvVeil.style.opacity = String(shadeCover); tape.shadeCover = shadeCover }
       }
 
       const playScale = opening ? 0 : smooth(clamp01(1 - Math.abs(T - s) * 3))
-      play.style.transform = `scale(${playScale.toFixed(4)})`
-      play.style.pointerEvents = playScale > 0.5 ? '' : 'none'
+      const playTf = `scale(${playScale.toFixed(3)})`
+      if (playTf !== lastPlay) { play.style.transform = playTf; play.style.pointerEvents = playScale > 0.5 ? '' : 'none'; lastPlay = playTf }
 
       raf = requestAnimationFrame(frame)
     }
@@ -295,6 +310,10 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
     // 창 크기뿐 아니라 svh 기준 높이가 바뀔 때도 다시 잰다.
     const sizeObserver = new ResizeObserver(() => measure())
     sizeObserver.observe(probe)
+    // 위쪽 섹션 높이가 바뀌면(글꼴·사진 로딩) 선반 위치만 다시 읽는다.
+    const pageObserver = new ResizeObserver(() => measureBox())
+    pageObserver.observe(document.body)
+    listen(window, 'resize', measureBox)
 
     const observer = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) run(); else stop() })
     observer.observe(section)
@@ -307,6 +326,7 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       stop()
       observer.disconnect()
       sizeObserver.disconnect()
+      pageObserver.disconnect()
       window.clearTimeout(wheelTimer)
       cleanups.forEach(cleanup => cleanup())
       sheet.getAnimations({ subtree: true }).forEach(animation => animation.cancel())
@@ -325,12 +345,13 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
             return <div className="shelf-tape" key={v}>
               <div className="shelf-face shelf-sp" style={{ '--sp-bg': color.bg, '--sp-fg': color.fg } as CSSProperties}>
                 <span className="no">{pad(index)}</span>
-                <span className="ph"><img src={item.photo.src} alt="" draggable={false} /></span>
+                <span className="ph"><img src={item.photo.src} alt="" decoding="async" draggable={false} /></span>
                 <span className="tt">{item.title}</span>
-                <span className="mk">p.</span>
+                <span className="mk" />
+                <span className="shelf-veil" />
               </div>
               <div className="shelf-face shelf-cv">
-                <img src={item.photo.src} alt="" draggable={false} />
+                <img src={item.photo.src} alt="" decoding="async" draggable={false} />
                 <span className="shade" />
                 <span className="print">
                   <span className="mast">PITCHSIDE</span>
@@ -339,6 +360,7 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
                   <span className="sub">{item.subtitle}</span>
                   <span className="lb">{item.label}</span>
                 </span>
+                <span className="shelf-veil" />
               </div>
             </div>
           })}
@@ -355,7 +377,6 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       <div className="mag-shelf-caption" aria-live="polite">
         <div className="shelf-mask shelf-title" />
         <div className="shelf-mask shelf-sub" />
-        <div className="shelf-mask shelf-meta" />
       </div>
       <button type="button" className="mag-shelf-arrow" aria-label="다음 이야기" onClick={() => controls.current?.step(1)}>
         <svg width="18" height="10" viewBox="0 0 18 10" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="m13 1 4 4-4 4m4-4H1" /></svg>

@@ -14,7 +14,7 @@ function MagazinePhoto({ photo, eager = false }: { photo: Photo; eager?: boolean
 }
 
 function MagazineFooter() {
-  return <footer className="mag-footer"><a href="#/magazine" className="mag-footer-brand mag-gradient">PITCHSIDE</a><p>축구를 좋아하는 우리의 삶을 기록합니다.</p><div><a href="#/">기사 홈으로 ↗</a><small>© 2026 Pitchside</small></div></footer>
+  return <footer className="mag-footer"><a href="#/magazine" className="mag-footer-brand mag-gradient">PITCHSIDE</a><small>© 2026 Pitchside</small></footer>
 }
 
 function MagazineText({ text }: { text: string }) {
