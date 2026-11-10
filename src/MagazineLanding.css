@@ -51,7 +51,9 @@
 
 /* 4. 이야기 카드 */
 .jk-projects { position: relative; z-index: 10; padding: 5rem 1.25rem 6rem; border-radius: 40px 40px 0 0; background: var(--jk-bg); }
-.jk-projects .jk-heading { margin-bottom: 4rem; }
+/* STORIES 제목은 아래 카드와 같은 폭으로 꽉 채운다. 3.75는 Kanit 900 대문자 STORIES의 글자 크기 대비 폭이다. */
+.jk-fit { max-width: 1400px; margin: 0 auto 3rem; container-type: inline-size; }
+.jk-fit .jk-heading { font-size: calc(100cqw / 3.75); line-height: .9; white-space: nowrap; }
 .mag-stack { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; row-gap: 0px; }
 .mag-stack-item { position: sticky; top: calc(6rem + var(--stack-index) * 28px); height: 85vh; }
 .mag-stack-item > * { transform-origin: top center; will-change: transform; }

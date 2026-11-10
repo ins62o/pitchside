@@ -114,7 +114,7 @@ function About() {
 
 function Stories() {
   return <section className="jk-projects" id="mag-stories" aria-labelledby="jk-stories-heading">
-    <FadeIn y={40}><h2 className="hero-heading jk-heading" id="jk-stories-heading">Stories</h2></FadeIn>
+    <div className="jk-fit"><FadeIn y={40}><h2 className="hero-heading jk-heading" id="jk-stories-heading">Stories</h2></FadeIn></div>
     <StackList>{stories.map(({ feature, images: [top, bottom, tall] }, index) => <article className="jk-card" key={feature.id} aria-labelledby={`jk-story-${feature.id}`}>
       <div className="jk-card-top">
         <span className="jk-card-no" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
