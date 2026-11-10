@@ -19,7 +19,7 @@ npm run dev
 
 - `/#/`: 주요 기사 1건, 보조 주요 기사 3건, 최신 기사 목록
 - `/#/articles`: 전체기사, K리그·K3/K4·대학/유스·축구종합 분류(`?section=`), 제목·요약 검색
-- `/#/magazine`: 중앙 제호·특집 표지 선택·A4 비율 이야기 표지·편집부 소개
+- `/#/magazine`: 어두운 표지 화면. 3D 책 선반(특집 5편) → 사진 마키 → About us → Sections → Stories 카드 쌓기
 - `/#/magazine/saturday`: 매거진 전용 상세, 큰 사진과 700px 본문, 고운바탕·볼드·밑줄
 - `/#/magazine/about`: 사진과 매거진 소개
 - `/#/articles/before-kickoff`: 기사 상세, 중간 제목·인용문·사진 설명·관련 기사

@@ -3,7 +3,7 @@
 :root[data-seed-color-mode='dark-only'] .magazine { --mag-paper: #222420; --mag-ink: #edece2; --mag-muted: #babbb0; --mag-line: #494c42; --mag-accent: #d9aeb7; }
 .magazine > main { outline: none; }
 .magazine ::selection { background: var(--mag-accent); color: var(--mag-paper); }
-.mag-header,.mag-cover-section,.mag-issues,.mag-editor-note,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: min(1400px,calc(100% - 96px)); margin-inline: auto; }
+.mag-header,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: min(1400px,calc(100% - 96px)); margin-inline: auto; }
 .mag-nav { min-height: 68px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; font-size: 12px; border-bottom: 1px solid var(--mag-line); }
 .mag-nav > a:first-child { justify-self: start; min-height: 44px; display: flex; align-items: center; }
 .mag-nav-center { justify-self: center; letter-spacing: 2.5px; font-size: 10px; }
@@ -13,47 +13,9 @@
 .mag-nav .theme-toggle { border: 0; background: transparent; color: var(--mag-ink); }
 .mag-masthead { display: block; width: fit-content; max-width: 100%; margin: 26px auto 30px; text-align: center; font: 400 clamp(62px,10.8vw,160px)/.98 'Iowan Old Style','Bodoni MT',Georgia,serif; letter-spacing: -.055em; }
 .mag-masthead > span { display: block; padding-top: 18px; font: 400 12px/1.5 Pretendard,sans-serif; letter-spacing: 2px; }
-.mag-cover { display: block; position: relative; min-height: 520px; height: min(64vw,660px); color: #fff8ed; overflow: hidden; }
 .mag-photo { position: relative; width: 100%; height: 100%; overflow: hidden; background: #353c32; }
 .mag-photo img { width: 100%; height: 100%; object-fit: cover; }
 .mag-photo-placeholder { width: 100%; height: 100%; min-height: 260px; display: grid; place-items: center; font: italic 700 40px Arial,sans-serif; color: #f4f1ea; }
-.mag-cover > .mag-photo { position: absolute; inset: 0; }
-.mag-cover img { object-position: center 45%; }
-.mag-cover-shade { position: absolute; inset: 0; background: linear-gradient(180deg,transparent 15%,#14171024 40%,#141710c9 100%); }
-.mag-cover-copy { position: absolute; bottom: 52px; left: 56px; right: 40px; }
-.mag-cover-copy > p { font-size: 14px; letter-spacing: 2px; margin-bottom: 20px; }
-.mag-cover-copy h1 { font: 400 clamp(44px,5.8vw,84px)/1.35 var(--mag-serif); letter-spacing: -3px; }
-.mag-cover-copy > span { display: flex; width: fit-content; align-items: center; gap: 40px; font-size: 12px; margin-top: 28px; padding-bottom: 10px; border-bottom: 1px solid #fff8ed99; }
-.mag-cover-copy > span > span { font-size: 19px; }
-.mag-cover-controls { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--mag-line); }
-.mag-cover-controls > p { font-size: 12px; display: flex; gap: 24px; }
-.mag-cover-controls p > span { color: var(--mag-muted); }
-.mag-cover-controls > div { display: flex; gap: 6px; }
-.mag-cover-controls button { min-height: 44px; min-width: 44px; border: 0; border-bottom: 1px solid transparent; background: transparent; color: var(--mag-muted); font: 12px Georgia,serif; }
-.mag-cover-controls button[aria-pressed=true] { color: var(--mag-ink); border-color: var(--mag-ink); }
-.mag-issues { padding-block: 92px 100px; }
-.mag-section-heading { margin-bottom: 40px; }
-.mag-section-heading h2 { font: 400 32px/1.5 var(--mag-serif); letter-spacing: -1px; }
-.mag-section-heading p { margin-top: 12px; color: var(--mag-muted); font-size: 13px; line-height: 1.7; }
-.mag-issue-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 30px; }
-.mag-issue { min-width: 0; }
-.mag-issue-cover { position: relative; aspect-ratio: 210/297; color: #fff8ed; overflow: hidden; }
-.mag-issue-cover .mag-photo { position: absolute; inset: 0; }
-.mag-issue-shade { position: absolute; inset: 0; background: linear-gradient(180deg,#11170c33,transparent 40%,#11170cc2); }
-.mag-issue-print { position: absolute; inset: 20px; display: flex; flex-direction: column; text-align: center; }
-.mag-issue-print > span { font: 26px/1.2 'Iowan Old Style',Georgia,serif; letter-spacing: -1px; }
-.mag-issue-print > strong { margin-top: auto; font: 400 clamp(20px,2.1vw,32px)/1.6 var(--mag-serif); letter-spacing: -1px; }
-.mag-issue-print > small { margin-top: 16px; font-size: 8px; letter-spacing: 2px; }
-.mag-issue-caption { display: flex; align-items: baseline; gap: 12px; margin-top: 20px; }
-.mag-issue-caption > span { font: 12px/1.5 Georgia,serif; color: var(--mag-muted); }
-.mag-issue-caption > span:last-child { margin-left: auto; font-size: 20px; }
-.mag-issue-caption h3 { font-size: 16px; font-weight: 550; line-height: 1.6; }
-.mag-issue-caption p { font-size: 11px; color: var(--mag-muted); line-height: 1.7; margin-top: 5px; }
-.mag-editor-note { padding: 64px 0 80px; border-top: 1px solid var(--mag-line); display: grid; grid-template-columns: 1fr 1.1fr; column-gap: 80px; }
-.mag-editor-note > p { grid-column: 1/-1; color: var(--mag-accent); font-size: 10px; letter-spacing: 2px; margin-bottom: 30px; }
-.mag-editor-note h2 { font: 400 clamp(28px,3.4vw,46px)/1.65 var(--mag-serif); letter-spacing: -1.5px; }
-.mag-editor-note > div > p { font-size: 15px; line-height: 2.1; color: var(--mag-muted); }
-.mag-editor-note > div > a { display: inline-block; margin-top: 22px; padding-block: 10px; text-decoration: underline; text-underline-offset: 7px; font-size: 12px; }
 .mag-footer { padding-block: 40px 28px; border-top: 1px solid var(--mag-line); }
 .mag-footer-brand { font: 34px/1.2 'Iowan Old Style',Georgia,serif; letter-spacing: -1px; }
 .mag-footer > p { font-size: 12px; color: var(--mag-muted); margin-top: 12px; }
@@ -98,52 +60,16 @@
 .mag-about-body > a { display: inline-block; font: 13px/1.6 Pretendard,sans-serif; padding-block: 12px; text-decoration: underline; text-underline-offset: 6px; margin-top: 20px; }
 .mag-missing { padding-block: 80px; text-align: center; }
 .mag-missing a { display: inline-block; padding: 24px; text-decoration: underline; }
-@media(hover: hover) and (prefers-reduced-motion: no-preference) {
-  .mag-cover img,.mag-issue-cover img { transition: transform 700ms ease; }
-  .mag-cover:hover img,.mag-issue a:hover img { transform: scale(1.025); }
-  .mag-issue a:hover h3 { color: var(--mag-accent); }
-}
 @media(max-width: 1024px) {
-  .mag-header,.mag-cover-section,.mag-issues,.mag-editor-note,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: calc(100% - 64px); }
-  .mag-issue-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 44px 28px; }
-  .mag-issue-print > strong { font-size: 32px; }
-  .mag-cover { min-height: 480px; }
-  .mag-editor-note { column-gap: 40px; }
-  .mag-desktop-break { display: none; }
+  .mag-header,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: calc(100% - 64px); }
 }
 @media(max-width: 640px) {
-  .mag-header,.mag-cover-section,.mag-issues,.mag-editor-note,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: calc(100% - 40px); }
+  .mag-header,.mag-footer,.mag-detail,.mag-about,.mag-missing { width: calc(100% - 40px); }
   .mag-nav { min-height: 56px; grid-template-columns: 1fr auto; font-size: 11px; }
   .mag-nav-center { display: none; }
   .mag-nav > div { gap: 8px; }
   .mag-masthead { font-size: clamp(50px,12.4vw,80px); margin-block: 24px 26px; }
   .mag-masthead > span { font-size: 10px; letter-spacing: 1px; padding-top: 12px; }
-  .mag-cover { height: 68svh; min-height: 440px; max-height: 660px; }
-  .mag-cover-copy { left: 24px; right: 20px; bottom: 36px; }
-  .mag-cover-copy > p { font-size: 11px; letter-spacing: .5px; margin-bottom: 10px; }
-  .mag-cover-copy h1 { font-size: 42px; letter-spacing: -2px; }
-  .mag-cover-copy > span { margin-top: 22px; font-size: 11px; }
-  .mag-cover-controls { gap: 8px; padding-block: 10px; }
-  .mag-cover-controls > p { flex-direction: column; gap: 6px; font-size: 10px; }
-  .mag-cover-controls > div { gap: 0; }
-  .mag-issues { padding-block: 56px; }
-  .mag-section-heading { margin-bottom: 28px; }
-  .mag-section-heading h2 { font-size: 25px; }
-  .mag-section-heading p { font-size: 11px; }
-  .mag-issue-grid { gap: 32px 16px; }
-  .mag-issue-print { inset: 12px; }
-  .mag-issue-print > span { font-size: clamp(14px,4.1vw,24px); }
-  .mag-issue-print > strong { font-size: clamp(16px,4.5vw,25px); letter-spacing: -.8px; line-height: 1.7; }
-  .mag-issue-print > small { font-size: 6px; letter-spacing: 1px; margin-top: 8px; }
-  .mag-issue-caption { gap: 7px; margin-top: 12px; }
-  .mag-issue-caption > span:first-child { display: none; }
-  .mag-issue-caption h3 { font-size: 14px; }
-  .mag-issue-caption p { font-size: 10px; }
-  .mag-issue-cover .photo-watermark { display: none; }
-  .mag-editor-note { display: block; padding-block: 40px 56px; }
-  .mag-editor-note > p { margin-bottom: 24px; }
-  .mag-editor-note h2 { font-size: 30px; margin-bottom: 24px; }
-  .mag-editor-note > div > p { font-size: 14px; }
   .mag-footer { padding-top: 32px; }
   .mag-detail-heading { margin-block: 28px 36px; }
   .mag-detail-heading > p { margin-top: 24px; font-size: 12px; }

@@ -1,0 +1,96 @@
+/* 팬 매거진 책 선반. 색은 --shelf-* 변수로 받고, 기본값은 매거진 종이 지면을 따른다. */
+.mag-shelf-section {
+  --H: min(50svh, 33vw);
+  --shelf-bg: var(--mag-paper);
+  --shelf-ink: var(--mag-ink);
+  --shelf-sub: var(--mag-accent);
+  --shelf-muted: var(--mag-muted);
+  --shelf-accent: var(--mag-accent);
+  --shelf-on: var(--mag-paper);
+  --shelf-rule: color-mix(in srgb, var(--mag-ink) 85%, transparent);
+  --shelf-ease: cubic-bezier(.2,.8,.2,1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow-x: clip;
+  color: var(--shelf-ink);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mag-shelf-index { position: relative; display: flex; align-self: center; margin-bottom: 20px; }
+.mag-shelf-index button { position: relative; z-index: 1; height: 26px; min-width: 46px; padding: 0 12px; margin-left: -1px; border: 1px solid var(--shelf-rule); border-radius: 0; background: none; color: inherit; font: 500 11px/1 Kanit, Pretendard, sans-serif; letter-spacing: .14em; transition: color .45s var(--shelf-ease); }
+.mag-shelf-index button::after { content: ''; position: absolute; inset: -9px 0; }
+.mag-shelf-index button:first-of-type { margin-left: 0; }
+.mag-shelf-index button.on { color: var(--shelf-on); }
+.mag-shelf-index .ind { position: absolute; left: 0; top: 0; width: 0; height: 26px; background: var(--shelf-accent); transition: width .6s var(--shelf-ease), transform .6s var(--shelf-ease); }
+
+.mag-shelf-wrap { position: relative; height: calc(var(--H) + 80px); }
+.mag-shelf { position: absolute; inset: 0; perspective: 2200px; perspective-origin: 50% 50%; touch-action: pan-y; outline: none; }
+.mag-shelf:focus-visible { outline: 1px solid var(--shelf-ink); outline-offset: -6px; }
+.mag-shelf-stage { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+.shelf-tape { position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
+.shelf-face { position: absolute; top: calc(var(--h) / -2); height: var(--h); overflow: hidden; border-radius: 2px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.shelf-face::after { content: ''; position: absolute; inset: 0; background: #000; opacity: var(--shade, 0); pointer-events: none; }
+.shelf-face img { max-width: none; width: 100%; height: 100%; object-fit: cover; }
+
+/* 책등: 정면, 폭 --ws */
+.shelf-sp { width: var(--ws); left: calc(var(--ws) / -2); transform: translateZ(calc(var(--d) / 2)); display: flex; flex-direction: column; align-items: center; gap: calc(var(--ws) * .16); padding: calc(var(--ws) * .16) 0 calc(var(--ws) * .2); background: var(--sp-bg); color: var(--sp-fg); box-shadow: inset 1px 0 rgba(255,255,255,.14), inset -1px 0 rgba(0,0,0,.22); }
+.shelf-sp .no { font: 400 calc(var(--ws) * .2)/1 'Iowan Old Style', Georgia, serif; letter-spacing: .04em; }
+.shelf-sp .ph { display: block; flex: none; width: calc(var(--ws) * .74); aspect-ratio: 3/4; overflow: hidden; }
+.shelf-sp .tt { flex: 1; min-height: 0; overflow: hidden; writing-mode: vertical-rl; white-space: nowrap; font: 400 calc(var(--ws) * .38)/1 var(--mag-serif); letter-spacing: .1em; }
+.shelf-sp .mk { padding: calc(var(--ws) * .06) calc(var(--ws) * .1); border: 1px solid currentColor; font: italic 700 calc(var(--ws) * .2)/1 Arial, sans-serif; }
+
+/* 표지: 오른쪽 옆면, 폭 --d(A4 비율) */
+/* 회전한 면에 overflow: hidden을 주면 Chrome에서 클릭 판정이 사라지므로 표지는 잘라내지 않는다. */
+.shelf-cv { overflow: visible; width: var(--d); left: calc(var(--d) / -2); transform: rotateY(90deg) translateZ(calc(var(--ws) / 2)); background: #353c32; color: #fff8ed; box-shadow: 0 30px 60px -28px rgba(0,0,0,.75); }
+.shelf-cv > img,.shelf-cv .shade { position: absolute; inset: 0; border-radius: inherit; }
+.shelf-cv .shade { position: absolute; inset: 0; background: linear-gradient(180deg, #11170c70, transparent 36%, transparent 50%, #11170ce0); }
+.shelf-cv .print { position: absolute; inset: calc(var(--d) * .07); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.shelf-cv .mast { font: 400 calc(var(--d) * .16)/1 'Iowan Old Style', 'Bodoni MT', Georgia, serif; letter-spacing: -.05em; }
+.shelf-cv .issue { margin-top: calc(var(--d) * .035); font: 500 calc(var(--d) * .032)/1 Pretendard, sans-serif; letter-spacing: .24em; }
+.shelf-cv .ttl { margin-top: auto; font: 400 calc(var(--d) * .105)/1.4 var(--mag-serif); letter-spacing: -.03em; word-break: keep-all; }
+.shelf-cv .sub { margin-top: calc(var(--d) * .03); font: 400 calc(var(--d) * .04)/1.5 Pretendard, sans-serif; }
+.shelf-cv .lb { margin-top: calc(var(--d) * .05); font: 600 calc(var(--d) * .028)/1 Pretendard, sans-serif; letter-spacing: .24em; }
+
+.mag-shelf-play { position: absolute; z-index: 5; left: calc(50% - var(--d) / 2 - 6px); top: calc(50% + var(--h) * .36); width: 42px; height: 42px; margin: -21px 0 0 -21px; padding: 0; display: grid; place-items: center; border: 1px solid var(--shelf-ink); border-radius: 50%; background: color-mix(in srgb, var(--shelf-bg) 72%, transparent); color: var(--shelf-ink); transform: scale(0); }
+.mag-shelf-play svg { margin-left: 2px; }
+
+.mag-shelf-row { display: grid; grid-template-columns: 44px minmax(0,1fr) 44px; align-items: start; width: calc(100% - 40px); margin: 22px auto 0; }
+.mag-shelf-arrow { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; border: 0; background: none; color: inherit; }
+.mag-shelf-caption { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+.shelf-mask { position: relative; width: 100%; max-width: 760px; overflow: hidden; text-align: center; }
+.shelf-mask > span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.shelf-mask > span + span { position: absolute; left: 0; top: 0; width: 100%; }
+.shelf-title { font: 400 30px/1.4 var(--mag-serif); letter-spacing: -.02em; }
+.shelf-sub { font: 400 13px/1.5 Pretendard, sans-serif; color: var(--shelf-sub); }
+.shelf-meta { font: 500 11px/1.4 Kanit, Pretendard, sans-serif; letter-spacing: .16em; color: var(--shelf-muted); }
+
+.mag-shelf-probe { position: absolute; left: -9999px; top: 0; width: 1px; height: var(--H); visibility: hidden; pointer-events: none; }
+
+/* 선반 위에서만 쓰는 원형 커서 */
+.mag-shelf-cursor { position: fixed; left: 0; top: 0; z-index: 150; width: 58px; height: 58px; margin: -29px 0 0 -29px; pointer-events: none; visibility: hidden; }
+.mag-shelf-cursor .ring { position: absolute; inset: 0; border: 1.5px solid var(--shelf-ink); border-radius: 50%; background-color: transparent; transition: transform .5s var(--shelf-ease), background-color .4s var(--shelf-ease), border-color .4s var(--shelf-ease); }
+.mag-shelf-cursor .dot { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: var(--shelf-ink); transition: transform .4s var(--shelf-ease); }
+.mag-shelf-cursor .label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--shelf-on); font: 500 10px/1.3 Kanit, Pretendard, sans-serif; letter-spacing: .1em; transform: scale(0); transition: transform .45s var(--shelf-ease); }
+.mag-shelf-cursor[data-state=spine] .ring { transform: scale(.72); }
+.mag-shelf-cursor[data-state=button] .ring { transform: scale(.55); }
+.mag-shelf-cursor[data-state=button] .dot,.mag-shelf-cursor[data-state=open] .dot { transform: scale(0); }
+.mag-shelf-cursor[data-state=open] .ring { transform: scale(1.75); background-color: var(--shelf-accent); border-color: var(--shelf-accent); }
+.mag-shelf-cursor[data-state=open] .label { transform: scale(1); }
+@media (hover: hover) and (pointer: fine) {
+  .mag-shelf-section,.mag-shelf-section * { cursor: none; }
+  .mag-shelf-cursor[data-visible=true] { visibility: visible; }
+}
+
+/* 표지에서 자라 상세 지면이 되는 종이 */
+.mag-shelf-sheet { position: fixed; inset: 0; z-index: 200; background: var(--mag-paper); visibility: hidden; pointer-events: none; }
+
+@media (max-width: 640px) {
+  .mag-shelf-section { --H: min(64vw, 42svh); }
+  .mag-shelf-index button { min-width: 40px; padding: 0 9px; font-size: 10px; }
+  .mag-shelf-row { width: calc(100% - 12px); margin-top: 18px; }
+  .shelf-title { font-size: 23px; }
+  .shelf-sub { font-size: 12px; }
+}
