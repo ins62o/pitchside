@@ -17,12 +17,47 @@
 .mag-fill[data-filled=true] [aria-hidden] > span { opacity: 1; }
 
 /* 상단 메뉴 */
-.jk-top { position: relative; z-index: 2; } /* 3. 책 선반 */
-.jk-shelf { width: var(--mag-width); margin-inline: auto; min-height: 100svh; display: flex; flex-direction: column; overflow-x: clip; }
-.jk-shelf .mag-shelf-section { --H: min(50svh, 33vw); --shelf-bg: var(--jk-bg); --shelf-ink: var(--jk-ink); --shelf-sub: var(--jk-sub); --shelf-muted: var(--jk-muted); --shelf-accent: var(--jk-accent); --shelf-on: #fff; --shelf-rule: rgba(215,226,234,.5); flex: 1; padding-block: 40px 56px; }
-.jk-nav { display: flex; justify-content: space-between; width: var(--mag-width); margin-inline: auto; padding: 24px 0 0; color: var(--jk-ink); font: 500 .875rem/1 Kanit, Pretendard, sans-serif; letter-spacing: .05em; text-transform: uppercase; }
-.jk-nav a { min-height: 44px; display: inline-flex; align-items: center; transition: opacity .2s; }
-.jk-nav a:hover { opacity: .7; }
+.jk-top { position: relative; z-index: 2; }
+.jk-top.is-overlay { position: absolute; inset: 0 0 auto; color: #fff; }
+.jk-shelf { width: var(--mag-width); margin-inline: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-block: 64px 40px; overflow-x: clip; scroll-margin-top: 24px; }
+.jk-shelf-heading { text-align: center; font: 500 16px/1.4 Kanit, Pretendard, sans-serif; }
+.jk-shelf-heading > span:not(.sr-only) { font-weight: 300; }
+.jk-shelf .mag-shelf-section { --H: min(50svh, 33vw); --shelf-bg: var(--jk-bg); --shelf-ink: var(--jk-ink); --shelf-sub: var(--jk-sub); --shelf-muted: var(--jk-muted); --shelf-accent: var(--jk-accent); --shelf-on: #fff; --shelf-rule: rgba(215,226,234,.5); padding-block: 48px 32px; }
+.jk-nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: var(--mag-width); margin-inline: auto; padding: 20px 0; color: inherit; font: 400 13px/1 Kanit, Pretendard, sans-serif; }
+.jk-masthead { gap: 5px; font-size: 16px; font-weight: 500; white-space: nowrap; }
+.jk-masthead span { font-weight: 300; }
+.jk-nav-articles { gap: 4px; }
+.jk-nav a { min-height: 44px; display: inline-flex; align-items: center; padding: 10px 18px; border: 1px solid color-mix(in srgb, currentColor 40%, transparent); border-radius: 999px; white-space: nowrap; transition: background-color .2s; }
+.jk-nav a:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+.jk-top.is-overlay a:focus-visible { outline-color: #fff; }
+
+/* 메인과 상세는 같은 사진 표지에서 시작하고 다음 지면으로 자연스럽게 스크롤한다. */
+.mag-cover { position: relative; display: flex; align-items: flex-end; isolation: isolate; width: 100%; min-height: 100svh; padding: 140px var(--mag-gutter) 48px; background: #242a28; color: #fff; }
+.mag-cover-image { position: absolute; z-index: -2; inset: 0; overflow: hidden; }
+.mag-cover-image > img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+.mag-cover::before { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(180deg, #0005, transparent 25%, transparent 55%, #0007); pointer-events: none; }
+.mag-cover-placeholder { display: grid; place-items: center; width: 100%; height: 100%; font: italic 700 clamp(48px, 10vw, 120px)/1.2 Arial, sans-serif; color: #c6cfcb; }
+.mag-cover-title { width: 100%; margin: 0; font: 700 clamp(36px, 5vw, 88px)/1.2 Pretendard, sans-serif; letter-spacing: -.045em; word-break: keep-all; text-wrap: balance; }
+/* 사진·제목은 천천히 뒤에 남고, 다음 지면이 표지 아래쪽부터 덮으며 올라온다. */
+.mag-cover.is-scroll-cover { --cover-scroll: 0px; overflow: hidden; }
+.is-scroll-cover .mag-cover-image { transform: translate3d(0, calc(var(--cover-scroll) * .72), 0); }
+.is-scroll-cover .mag-cover-title { translate: 0 calc(var(--cover-scroll) * .8); }
+@media (prefers-reduced-motion: reduce) {
+  .is-scroll-cover .mag-cover-image { transform: none; }
+  .is-scroll-cover .mag-cover-title { translate: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mag-cover-title { animation: mag-cover-enter .8s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes mag-cover-enter { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+}
+@media (max-width: 767px) {
+  .jk-nav { padding-block: 16px; font-size: 12px; }
+  .jk-masthead { font-size: 14px; }
+  .jk-nav a { padding-inline: 12px; }
+  .mag-cover { padding-bottom: 32px; }
+  .mag-cover-title { font-size: clamp(32px, 7vw, 54px); }
+  .jk-shelf { min-height: 85svh; padding-block: 40px; }
+}
 
 /* 2. 사진 마키: 소개 버튼 바로 아래에서 자동으로 흐른다. 마우스를 올리면 잠시 멈춘다. */
 .jk-marquee { display: flex; flex-direction: column; gap: 12px; width: var(--mag-width); margin: 0 auto 2.5rem; overflow: hidden; border-radius: 16px; }
@@ -105,7 +140,7 @@
   .jk-card-grid img { border-radius: 50px; }
 }
 @media (min-width: 768px) {
-  .jk-nav { padding-top: 32px; font-size: 1.125rem; }
+  .jk-nav { padding-block: 24px; }
   .jk-about-inner { gap: 6rem; }
   .jk-about-copy { gap: 4rem; }
   .jk-deco-tl { width: 210px; }
@@ -117,9 +152,6 @@
   .mag-stack-item { top: calc(8rem + var(--stack-index) * 28px); }
   .jk-card { padding: 2rem; border-radius: 60px; }
   .jk-card-grid img { border-radius: 60px; }
-}
-@media (min-width: 1024px) {
-  .jk-nav { font-size: 1.4rem; }
 }
 @media (max-width: 640px) {
   .jk-shelf .mag-shelf-section { --H: min(64vw, 42svh); }

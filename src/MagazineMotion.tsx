@@ -1,22 +1,9 @@
 import { Children, useEffect, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
+import { onScrollFrame } from './magazine-scroll'
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value))
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-function onScrollFrame(update: () => void) {
-  let frame = 0
-  const run = () => { frame = 0; update() }
-  const request = () => { if (!frame) frame = requestAnimationFrame(run) }
-  window.addEventListener('scroll', request, { passive: true })
-  window.addEventListener('resize', request)
-  update()
-  return () => {
-    window.removeEventListener('scroll', request)
-    window.removeEventListener('resize', request)
-    cancelAnimationFrame(frame)
-  }
-}
 
 export function FadeIn({ children, className = '', delay = 0, x = 0, y = 30 }: { children: ReactNode; className?: string; delay?: number; x?: number; y?: number }) {
   const element = useRef<HTMLDivElement>(null)

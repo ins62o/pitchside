@@ -1,6 +1,8 @@
-import type { CSSProperties, MouseEvent } from 'react'
+import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import MagazineShelf from './MagazineShelf'
 import { AutoRow, FadeIn, FillText, StackList } from './MagazineMotion'
+import { useCoverScroll } from './magazine-scroll'
 import { features, magazineUrl, photos } from './magazine-content'
 import type { Photo } from './magazine-content'
 import './MagazineLanding.css'
@@ -43,43 +45,35 @@ const stories = [
 
 const aboutText = '승패만으로는 다 담을 수 없는 축구가 있습니다. 첫 유니폼을 입던 날, 원정 버스에서 만난 사람, 목이 쉬도록 부른 응원가. 피치사이드 팬 매거진은 경기장 곁에서 만나는 사람들의 이야기를 한 장씩 기록합니다. 당신의 토요일도 함께 펼쳐 볼까요?'
 
-// 해시 라우팅을 쓰므로 페이지 안 이동은 주소를 바꾸지 않고 스크롤만 한다.
-function jump(id: string) {
-  return (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault()
-    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    document.getElementById(id)?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' })
-  }
-}
-
 function MarqueeTile({ tile }: { tile: Tile }) {
   if ('photo' in tile) return <div className="jk-tile"><img src={tile.photo.src} alt="" loading="lazy" draggable={false} style={{ objectPosition: tile.position }} /></div>
   return <div className="jk-tile jk-tile-text" style={{ '--tile-bg': tile.bg, '--tile-fg': tile.fg } as CSSProperties}><small>{tile.label}</small><strong>{tile.title}</strong><span>PITCHSIDE</span></div>
 }
 
-// 매거진 모든 화면이 같은 상단 메뉴를 쓴다. 표지 화면에서는 섹션으로 스크롤하고, 그 밖의 화면에서는 페이지로 이동한다.
-export function MagazineTopNav({ page = 'home' }: { page?: 'home' | 'about' | 'detail' }) {
-  return <header className="jk-top">
+export function MagazineTopNav({ overlay = false }: { overlay?: boolean }) {
+  return <header className={`jk-top${overlay ? ' is-overlay' : ''}`}>
     <FadeIn y={-20}>
       <nav className="jk-nav" aria-label="팬 매거진 메뉴">
-        {page === 'home' ? <>
-          <a href="#/magazine" onClick={jump('mag-about')}>About</a>
-          <a href="#/magazine" onClick={jump('mag-shelf')}>Shelf</a>
-          <a href="#/magazine" onClick={jump('mag-stories')}>Stories</a>
-        </> : <>
-          <a href="#/magazine">Magazine</a>
-          <a href="#/magazine/about" aria-current={page === 'about' ? 'page' : undefined}>About</a>
-        </>}
-        <a href="#/">Articles <span aria-hidden="true">↗</span></a>
+        <a className="jk-masthead" href="#/magazine" aria-label="피치사이드 매거진 홈">PITCHSIDE <span>MAGAZINE</span></a>
+        <a className="jk-nav-articles" href="#/">Articles <span aria-hidden="true">↗</span></a>
       </nav>
     </FadeIn>
-    {page === 'home' && <h1 className="sr-only">피치사이드 팬 매거진 2026 가을호</h1>}
   </header>
+}
+
+export function MagazineCover({ photo, title, page = 'home' }: { photo: Photo; title: string; page?: 'home' | 'detail' }) {
+  const [failed, setFailed] = useState(false)
+  const cover = useCoverScroll(page === 'home')
+  return <section ref={cover} className={`mag-cover${page === 'home' ? ' is-scroll-cover' : ''}`} aria-label={`${title} 표지`}>
+    <div className="mag-cover-image">{failed ? <div className="mag-cover-placeholder" role="img" aria-label="표지 사진 준비 중">pitchside.</div> : <img src={photo.src} alt={photo.alt} fetchPriority="high" onError={() => setFailed(true)} />}</div>
+    <MagazineTopNav overlay />
+    <h1 className="mag-cover-title">{title}</h1>
+  </section>
 }
 
 function ShelfSection() {
   return <section className="jk-shelf" id="mag-shelf" aria-labelledby="jk-shelf-heading">
-    <h2 className="sr-only" id="jk-shelf-heading">이번 호 특집</h2>
+    <h2 className="jk-shelf-heading" id="jk-shelf-heading">PITCHSIDE <span>MAGAZINE</span><span className="sr-only"> 이번 호 특집</span></h2>
     <MagazineShelf items={features} href={magazineUrl} />
   </section>
 }
@@ -131,10 +125,10 @@ function Stories() {
 
 export default function MagazineLanding() {
   return <div className="mag-landing">
-    <MagazineTopNav />
+    <MagazineCover photo={photos.cover} title="피치사이드 매거진" />
+    <ShelfSection />
     <About />
     <Marquee />
-    <ShelfSection />
     <Stories />
   </div>
 }
