@@ -153,8 +153,8 @@ export default function MagazineShelf({ items, href }: { items: ShelfItem[]; hre
       sheet.querySelector('img')!.src = items[index].photo.src
       sheet.style.transformOrigin = `${rect.x}px ${rect.y}px`
       sheet.style.visibility = 'visible'
-      // 표지 사진이 화면 전체로 커지면서 매거진 지면 색으로 어두워진다.
-      sheet.querySelector('.veil')!.animate([{ opacity: 0.15 }, { opacity: 1 }], { duration: reduce ? 1 : 1050, easing: 'cubic-bezier(.6,0,.4,1)', fill: 'both' })
+      // 표지 사진이 화면을 채운 뒤 같은 사진의 상세 표지로 이어진다.
+      sheet.querySelector('.veil')!.animate([{ opacity: 0.15 }, { opacity: 0 }], { duration: reduce ? 1 : 1050, easing: 'cubic-bezier(.6,0,.4,1)', fill: 'both' })
       const animation = sheet.animate(
         [{ clipPath: rect.inset, transform: `rotate(${LEAN}deg)` }, { clipPath: 'inset(0px 0px 0px 0px round 0px)', transform: 'rotate(0deg)' }],
         { duration: reduce ? 1 : 1050, easing: SHEET_EASE, fill: 'both' })

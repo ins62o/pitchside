@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { RefObject } from 'react'
-import MagazineLanding, { MagazineTopNav } from './MagazineLanding'
+import MagazineLanding, { MagazineCover, MagazineTopNav } from './MagazineLanding'
 import { features, magazineUrl, photos } from './magazine-content'
 import type { Photo } from './magazine-content'
 import type { ReaderArticle } from './reader-data'
@@ -26,24 +26,13 @@ function MagazineDetail({ article }: { article: ReaderArticle }) {
   const [cover, wide] = feature ? [feature.photo, feature.wide] : [photos.cover, photos.stadium]
   const quote = article.body.find(section => section.quote)?.quote
   const source = { title: feature?.title ?? article.title, author: article.author, date: article.date, quote: quote?.text ?? article.summary }
-  const heading = useRef<HTMLElement>(null)
-  const hero = useRef<HTMLElement>(null)
-  useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    // 선반에서 자라난 종이 위로 제목 줄이 각자의 마스크 안에서 올라오고, 대표 사진은 아래에서 위로 열린다.
-    const lines = [...(heading.current?.children ?? [])] as HTMLElement[]
-    const animations = lines.map((line, index) => line.animate(
-      [{ transform: 'translateY(100%)', clipPath: 'inset(0 0 100% 0)' }, { transform: 'translateY(0)', clipPath: 'inset(0 0 0% 0)' }],
-      { duration: 900, delay: 80 + index * 75, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' }))
-    const photo = hero.current?.firstElementChild
-    if (photo) animations.push(photo.animate([{ clipPath: 'inset(100% 0 0 0)' }, { clipPath: 'inset(0% 0 0 0)' }], { duration: 1250, delay: 260, easing: 'cubic-bezier(.76,0,.18,1)', fill: 'backwards' }))
-    return () => animations.forEach(animation => animation.cancel())
-  }, [article.id])
   return <article className="mag-detail">
-    <header className="mag-detail-heading" ref={heading}><a href="#/magazine">← Magazine</a><p>{feature?.label ?? article.kind}</p><h1 className="mag-gradient">{feature?.title ?? article.title}</h1>{feature && <p className="mag-detail-sub">{feature.subtitle}</p>}<div>{article.author} 기자 <span>·</span> {article.date.replaceAll('-', '.')}</div></header>
-    <figure className="mag-detail-hero" ref={hero}><MagazinePhoto photo={wide} eager /><figcaption>{article.image?.caption}</figcaption></figure>
+    <MagazineCover photo={cover} title={feature?.title ?? article.title} page="detail" />
+    <div className="mag-detail-paper">
+    <figure className="mag-detail-hero"><MagazinePhoto photo={wide} /><figcaption>{article.image?.caption}</figcaption></figure>
+    <header className="mag-detail-heading"><p>{feature?.label ?? article.kind}</p>{feature && <p className="mag-detail-sub">{feature.subtitle}</p>}<div>{article.author} 기자 <span>·</span> {article.date.replaceAll('-', '.')}</div></header>
     <QuoteShare source={source}>
-      <div className="mag-detail-intro"><p>{article.summary}</p><span aria-hidden="true">✳</span></div>
+      <div className="mag-detail-intro"><p>{article.summary}</p></div>
       <div className="mag-body">{article.body.map((section, index) => <section key={index}>
         {section.heading && <h2>{section.heading}</h2>}
         {section.paragraphs.map((paragraph, paragraphIndex) => <p key={paragraphIndex}><MagazineText text={index === 0 && paragraphIndex === 0 ? `**${paragraph}**` : paragraph} /></p>)}
@@ -53,6 +42,7 @@ function MagazineDetail({ article }: { article: ReaderArticle }) {
     </QuoteShare>
     <div className="mag-detail-end"><p>{article.author} 기자</p><a className="jk-ghost" href="#/magazine">다른 이야기 펼쳐보기</a></div>
     <aside className="mag-next-story"><p>Next story</p><a href={magazineUrl(features.find(item => item.id !== article.id)!.id)}><span className="mag-gradient">{features.find(item => item.id !== article.id)!.title}</span><span aria-hidden="true">↗</span></a></aside>
+    </div>
   </article>
 }
 
@@ -62,21 +52,23 @@ function MagazineAbout() {
 
 export default function MagazinePage({ page, article, mainRef }: { page: 'home' | 'about' | 'detail'; article?: ReaderArticle; mainRef: RefObject<HTMLElement | null> }) {
   const landing = page === 'home'
-  // 매거진은 사이트 테마와 관계없이 어두운 지면이므로 스크롤 끝의 바탕과 브라우저 색도 맞춘다.
+  const light = page === 'detail'
+  // 메인은 어둡게, 상세는 밝게 고정하고 기사 사이트의 저장된 테마는 유지한다.
   useEffect(() => {
     const root = document.documentElement
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
     const previous = meta?.content
     root.classList.add('magazine-root')
-    meta?.setAttribute('content', '#0C0C0C')
+    root.classList.toggle('magazine-light', light)
+    meta?.setAttribute('content', light ? '#FFFFFF' : '#0C0C0C')
     return () => {
-      root.classList.remove('magazine-root')
+      root.classList.remove('magazine-root', 'magazine-light')
       if (meta && previous) meta.content = previous
     }
-  }, [])
-  return <div className={landing ? 'magazine is-landing' : 'magazine'}>
+  }, [light])
+  return <div className={`magazine${landing ? ' is-landing' : light ? ' is-detail' : ''}`}>
     <a className="skip-link" href="#magazine-content" onClick={event => { event.preventDefault(); mainRef.current?.focus() }}>본문으로 바로가기</a>
-    {!landing && <MagazineTopNav page={page} />}
+    {!landing && (!light || !article) && <MagazineTopNav />}
     <main id="magazine-content" ref={mainRef} tabIndex={-1}>{landing ? <MagazineLanding /> : page === 'about' ? <MagazineAbout /> : article ? <MagazineDetail article={article} /> : <section className="mag-missing"><h1>이야기를 찾을 수 없습니다.</h1><a href="#/magazine">매거진으로 돌아가기 ↗</a></section>}</main>
     <MagazineFooter />
   </div>

@@ -21,8 +21,14 @@
 
 
 .mag-shelf-wrap { position: relative; height: calc(var(--H) + 80px); contain: layout style; }
+/* 3D 책의 투영된 가장자리와 그림자까지 한 번에 가린다. 부모에 mask를 걸면 3D 면이 평면으로 합쳐진다. */
+.mag-shelf-wrap::before,.mag-shelf-wrap::after { content: ''; position: absolute; z-index: 6; inset-block: 0; width: clamp(40px, 16%, 220px); pointer-events: none; }
+.mag-shelf-wrap::before { left: 0; background: linear-gradient(to right, var(--shelf-bg), transparent); }
+.mag-shelf-wrap::after { right: 0; background: linear-gradient(to left, var(--shelf-bg), transparent); }
 .mag-shelf { position: absolute; inset: 0; perspective: 2200px; perspective-origin: 50% 50%; touch-action: pan-y; outline: none; }
-.mag-shelf:focus-visible { outline: 1px solid var(--shelf-ink); outline-offset: -6px; }
+.mag-shelf:focus-visible { outline: none; }
+/* 초점 표시는 3D 책에 가려지지 않는 안내 영역에 둔다. */
+.mag-shelf-section:has(.mag-shelf:focus-visible) .mag-shelf-caption { outline: 1px solid var(--shelf-ink); outline-offset: 6px; border-radius: 4px; }
 .mag-shelf-stage { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
 .shelf-tape { cursor: pointer; position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
 .shelf-face { position: absolute; top: calc(var(--h) / -2); height: var(--h); overflow: hidden; border-radius: 2px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
