@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { RefObject } from 'react'
+import { ActionButton } from 'seed-design/ui/action-button'
 import MagazineLanding, { MagazineCover, MagazineTopNav } from './MagazineLanding'
 import { features, magazineUrl, photos } from './magazine-content'
 import type { Photo } from './magazine-content'
@@ -47,7 +48,7 @@ function MagazineDetail({ article }: { article: ReaderArticle }) {
 }
 
 function MagazineAbout() {
-  return <article className="mag-about"><header><p>ABOUT PITCHSIDE</p><h1 className="mag-gradient">축구를 좋아하는<br />우리의 삶을 기록합니다.</h1></header><MagazinePhoto photo={photos.fans} eager /><div className="mag-about-body"><p>승패만으로는 다 담을 수 없는 축구가 있습니다. 첫 유니폼을 입던 날, 원정 버스에서 만난 사람, 목이 쉬도록 부른 응원가.</p><p>피치사이드 팬 매거진은 경기장 곁에서 만나는 사람들의 이야기를 모은 지면입니다. 축구를 좋아하는 우리의 시선으로 그라운드 바깥의 시간을 바라봅니다.</p><h2>경기장 가까이, 사람들 곁에서.</h2><p>멀리서 평가하기보다 곁에서 바라봅니다. 응원하는 팀이 달라도 같은 토요일을 보내는 사람들의 이야기를 나란히 놓습니다.</p><a className="jk-contact" href="#/magazine">이번 호 읽으러 가기</a></div></article>
+  return <article className="mag-about"><header><p>ABOUT PITCHSIDE</p><h1 className="mag-gradient">축구를 좋아하는<br />우리의 삶을 기록합니다.</h1></header><MagazinePhoto photo={photos.fans} eager /><div className="mag-about-body"><p>승패만으로는 다 담을 수 없는 축구가 있습니다. 첫 유니폼을 입던 날, 원정 버스에서 만난 사람, 목이 쉬도록 부른 응원가.</p><p>피치사이드 팬 매거진은 경기장 곁에서 만나는 사람들의 이야기를 모은 지면입니다. 축구를 좋아하는 우리의 시선으로 그라운드 바깥의 시간을 바라봅니다.</p><h2>경기장 가까이, 사람들 곁에서.</h2><p>멀리서 평가하기보다 곁에서 바라봅니다. 응원하는 팀이 달라도 같은 토요일을 보내는 사람들의 이야기를 나란히 놓습니다.</p><ActionButton asChild className="ui-button jk-contact" variant="brandSolid" size="medium"><a href="#/magazine">이번 호 읽으러 가기</a></ActionButton></div></article>
 }
 
 export default function MagazinePage({ page, article, mainRef }: { page: 'home' | 'about' | 'detail'; article?: ReaderArticle; mainRef: RefObject<HTMLElement | null> }) {
@@ -68,7 +69,7 @@ export default function MagazinePage({ page, article, mainRef }: { page: 'home' 
   }, [light])
   return <div className={`magazine${landing ? ' is-landing' : light ? ' is-detail' : ''}`}>
     <a className="skip-link" href="#magazine-content" onClick={event => { event.preventDefault(); mainRef.current?.focus() }}>본문으로 바로가기</a>
-    {!landing && (!light || !article) && <MagazineTopNav />}
+    {page === 'about' && <MagazineTopNav />}
     <main id="magazine-content" ref={mainRef} tabIndex={-1}>{landing ? <MagazineLanding /> : page === 'about' ? <MagazineAbout /> : article ? <MagazineDetail article={article} /> : <section className="mag-missing"><h1>이야기를 찾을 수 없습니다.</h1><a href="#/magazine">매거진으로 돌아가기 ↗</a></section>}</main>
     <MagazineFooter />
   </div>

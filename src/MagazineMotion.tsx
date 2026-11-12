@@ -1,5 +1,5 @@
 import { Children, useEffect, useRef, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, PointerEvent, ReactNode } from 'react'
 import { onScrollFrame } from './magazine-scroll'
 
 const clamp = (value: number) => Math.min(1, Math.max(0, value))
@@ -21,6 +21,31 @@ export function FadeIn({ children, className = '', delay = 0, x = 0, y = 30 }: {
   return <div ref={element} className={`mag-fade ${className}`} data-visible={visible} style={{ '--fade-delay': `${delay}s`, '--fade-x': `${x}px`, '--fade-y': `${y}px` } as CSSProperties}>{children}</div>
 }
 
+export function BounceLetters({ text }: { text: string }) {
+  const element = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const target = element.current
+    if (!target) return
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const stop = () => target.getAnimations({ subtree: true }).forEach(animation => animation.cancel())
+    const update = () => { if (motion.matches) stop() }
+    motion.addEventListener('change', update)
+    return () => { motion.removeEventListener('change', update); stop() }
+  }, [])
+  const bounce = (event: PointerEvent<HTMLSpanElement>) => {
+    if (event.pointerType !== 'mouse' || reducedMotion()) return
+    const letter = event.currentTarget.firstElementChild as HTMLElement
+    letter.getAnimations().forEach(animation => animation.cancel())
+    letter.animate([
+      { transform: 'translateY(0)', offset: 0 },
+      { transform: 'translateY(-.04em)', offset: .4 },
+      { transform: 'translateY(.002em)', offset: .8 },
+      { transform: 'translateY(0)', offset: 1 },
+    ], { duration: 420, easing: 'ease-out' })
+  }
+  return <span ref={element} aria-hidden="true">{Array.from(text).map((letter, index) => <span className="jk-hero-letter" key={index} onPointerEnter={bounce}><span>{letter}</span></span>)}</span>
+}
+
 export function Magnet({ children, className = '', padding = 150, strength = 3 }: { children: ReactNode; className?: string; padding?: number; strength?: number }) {
   const element = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -39,27 +64,31 @@ export function Magnet({ children, className = '', padding = 150, strength = 3 }
   return <div ref={element} className={className} style={{ willChange: 'transform' }}>{children}</div>
 }
 
-// 화면에 들어오면 스크롤과 관계없이 글자를 앞에서부터 차례로 채운다.
-export function FillText({ text, className = '', step = 18, delay = 300 }: { text: string; className?: string; step?: number; delay?: number }) {
+// 문장이 화면의 80% 지점에서 들어와 20% 지점을 지날 때까지 글자를 채운다.
+export function FillText({ text, className = '' }: { text: string; className?: string }) {
   const element = useRef<HTMLParagraphElement>(null)
-  const [filled, setFilled] = useState(false)
   useEffect(() => {
     const target = element.current
     if (!target) return
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return
-      setFilled(true)
-      observer.disconnect()
-    }, { threshold: .4 })
-    observer.observe(target)
-    return () => observer.disconnect()
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
+    let previous = -1
+    const update = () => {
+      const box = target.getBoundingClientRect()
+      const progress = motion.matches ? 1 : clamp((window.innerHeight * .8 - box.top) / (box.height + window.innerHeight * .6))
+      if (progress === previous) return
+      previous = progress
+      target.style.setProperty('--fill-progress', `${progress}`)
+    }
+    const stop = onScrollFrame(update)
+    motion.addEventListener('change', update)
+    return () => {
+      stop()
+      motion.removeEventListener('change', update)
+      target.style.removeProperty('--fill-progress')
+    }
   }, [])
-  return <p ref={element} className={`mag-fill ${className}`} data-filled={filled}><span className="sr-only">{text}</span><span aria-hidden="true">{Array.from(text).map((letter, index) => <span key={index} style={{ transitionDelay: `${delay + index * step}ms` }}>{letter}</span>)}</span></p>
-}
-
-// 사진 줄은 스크롤과 관계없이 자동으로 흐른다. 같은 묶음을 두 번 이어 붙여 -50%까지 움직이면 끊김 없이 반복된다.
-export function AutoRow({ children, direction = 1, duration = 60 }: { children: ReactNode; direction?: 1 | -1; duration?: number }) {
-  return <div className="mag-auto-row" style={{ '--row-duration': `${duration}s` } as CSSProperties}><div className="mag-auto-track" data-direction={direction > 0 ? 'right' : 'left'}>{[0, 1].map(copy => <div className="mag-auto-set" key={copy} aria-hidden={copy > 0 || undefined}>{children}</div>)}</div></div>
+  const letters = Array.from(text)
+  return <p ref={element} className={`mag-fill ${className}`} style={{ '--char-count': letters.length } as CSSProperties}><span className="sr-only">{text}</span><span aria-hidden="true">{letters.map((letter, index) => <span key={index} style={{ '--char-index': index } as CSSProperties}>{letter}</span>)}</span></p>
 }
 
 export function StackList({ children }: { children: ReactNode }) {

@@ -1,41 +1,12 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
+import { ActionButton } from 'seed-design/ui/action-button'
 import MagazineShelf from './MagazineShelf'
-import { AutoRow, FadeIn, FillText, StackList } from './MagazineMotion'
+import { BounceLetters, FadeIn, FillText, StackList } from './MagazineMotion'
 import { useCoverScroll } from './magazine-scroll'
 import { features, magazineUrl, photos } from './magazine-content'
 import type { Photo } from './magazine-content'
 import './MagazineLanding.css'
-
-type Tile = { photo: Photo; position: string } | { title: string; label: string; bg: string; fg: string }
-const photoTile = (photo: Photo, position: string): Tile => ({ photo, position })
-const textTile = (title: string, label: string, bg: string, fg: string): Tile => ({ title, label, bg, fg })
-
-const firstRow: Tile[] = [
-  photoTile(photos.fans, 'center 40%'),
-  textTile('우리의 토요일', 'FAN CULTURE', '#713E48', '#F4EDE3'),
-  photoTile(photos.stadium, 'center 60%'),
-  photoTile(photos.cover, 'center 35%'),
-  textTile('90분보다 긴 원정의 기록', 'AWAY DAYS', '#E9E2D3', '#292924'),
-  photoTile(photos.objects, 'center 50%'),
-  photoTile(photos.fans, 'center 75%'),
-  textTile('킥오프 전의 시간', 'MATCHDAY', '#2E3A31', '#EDE7D9'),
-  photoTile(photos.stadium, 'center 25%'),
-  photoTile(photos.cover, 'center 70%'),
-  textTile('경기장 바깥에도, 축구는 있다.', 'PITCHSIDE', '#C8B79C', '#2B2620'),
-]
-const secondRow: Tile[] = [
-  photoTile(photos.objects, 'center 30%'),
-  textTile('유니폼을 입고 자라는 동네', 'LOCAL FOOTBALL', '#262A33', '#E9E4D8'),
-  photoTile(photos.cover, 'center 50%'),
-  photoTile(photos.stadium, 'center 85%'),
-  textTile('휘슬이 울린 뒤', 'AFTER THE GAME', '#713E48', '#F4EDE3'),
-  photoTile(photos.fans, 'center 20%'),
-  photoTile(photos.objects, 'center 75%'),
-  textTile('어디든, 함께', 'AWAY DAYS', '#2E3A31', '#EDE7D9'),
-  photoTile(photos.stadium, 'center 45%'),
-  photoTile(photos.cover, 'center 20%'),
-]
 
 const stories = [
   { feature: features[0], images: [photos.cover, photos.objects, photos.fans] },
@@ -45,17 +16,11 @@ const stories = [
 
 const aboutText = '승패만으로는 다 담을 수 없는 축구가 있습니다. 첫 유니폼을 입던 날, 원정 버스에서 만난 사람, 목이 쉬도록 부른 응원가. 피치사이드 팬 매거진은 경기장 곁에서 만나는 사람들의 이야기를 한 장씩 기록합니다. 당신의 토요일도 함께 펼쳐 볼까요?'
 
-function MarqueeTile({ tile }: { tile: Tile }) {
-  if ('photo' in tile) return <div className="jk-tile"><img src={tile.photo.src} alt="" loading="lazy" draggable={false} style={{ objectPosition: tile.position }} /></div>
-  return <div className="jk-tile jk-tile-text" style={{ '--tile-bg': tile.bg, '--tile-fg': tile.fg } as CSSProperties}><small>{tile.label}</small><strong>{tile.title}</strong><span>PITCHSIDE</span></div>
-}
-
 export function MagazineTopNav({ overlay = false }: { overlay?: boolean }) {
   return <header className={`jk-top${overlay ? ' is-overlay' : ''}`}>
     <FadeIn y={-20}>
       <nav className="jk-nav" aria-label="팬 매거진 메뉴">
-        <a className="jk-masthead" href="#/magazine" aria-label="피치사이드 매거진 홈">PITCHSIDE <span>MAGAZINE</span></a>
-        <a className="jk-nav-articles" href="#/">Articles <span aria-hidden="true">↗</span></a>
+        <ActionButton asChild className="ui-button jk-contact" variant="brandSolid" size="medium"><a href="#/">Articles <span aria-hidden="true">↗</span></a></ActionButton>
       </nav>
     </FadeIn>
   </header>
@@ -64,10 +29,10 @@ export function MagazineTopNav({ overlay = false }: { overlay?: boolean }) {
 export function MagazineCover({ photo, title, page = 'home' }: { photo: Photo; title: string; page?: 'home' | 'detail' }) {
   const [failed, setFailed] = useState(false)
   const cover = useCoverScroll(page === 'home')
-  return <section ref={cover} className={`mag-cover${page === 'home' ? ' is-scroll-cover' : ''}`} aria-label={`${title} 표지`}>
+  return <section ref={cover} className={`mag-cover${page === 'home' ? ' is-scroll-cover is-editorial-hero' : ''}`} aria-label={`${title} 표지`}>
     <div className="mag-cover-image">{failed ? <div className="mag-cover-placeholder" role="img" aria-label="표지 사진 준비 중">pitchside.</div> : <img src={photo.src} alt={photo.alt} fetchPriority="high" onError={() => setFailed(true)} />}</div>
-    <MagazineTopNav overlay />
-    <h1 className="mag-cover-title">{title}</h1>
+    {page === 'home' && <MagazineTopNav overlay />}
+    {page === 'home' ? <FadeIn className="jk-hero-heading" delay={.15} y={40}><h1 className="hero-heading mag-cover-title jk-hero-title" aria-label={title}><BounceLetters text="PITCHSIDE" /></h1></FadeIn> : <h1 className="mag-cover-title">{title}</h1>}
   </section>
 }
 
@@ -75,13 +40,6 @@ function ShelfSection() {
   return <section className="jk-shelf" id="mag-shelf" aria-labelledby="jk-shelf-heading">
     <h2 className="jk-shelf-heading" id="jk-shelf-heading">PITCHSIDE <span>MAGAZINE</span><span className="sr-only"> 이번 호 특집</span></h2>
     <MagazineShelf items={features} href={magazineUrl} />
-  </section>
-}
-
-function Marquee() {
-  return <section className="jk-marquee" aria-label="매거진 사진">
-    <AutoRow direction={1} duration={76}>{firstRow.map((tile, index) => <MarqueeTile tile={tile} key={index} />)}</AutoRow>
-    <AutoRow direction={-1} duration={69}>{secondRow.map((tile, index) => <MarqueeTile tile={tile} key={index} />)}</AutoRow>
   </section>
 }
 
@@ -101,8 +59,25 @@ function About() {
         <FadeIn y={40}><h2 className="hero-heading jk-heading" id="jk-about-heading">About us</h2></FadeIn>
         <FillText className="jk-about-text" text={aboutText} />
       </div>
-      <FadeIn delay={.2} y={20}><a className="jk-contact" href="#/magazine/about">매거진 소개 보기</a></FadeIn>
+      <FadeIn delay={.2} y={20}><ActionButton asChild className="ui-button jk-contact" variant="brandSolid" size="medium"><a href="#/magazine/about">매거진 소개 보기</a></ActionButton></FadeIn>
     </div>
+  </section>
+}
+
+function Contents() {
+  return <section className="jk-contents" aria-labelledby="jk-contents-heading">
+    <FadeIn y={40}><h2 className="jk-heading" id="jk-contents-heading">Contents<span className="sr-only"> 이번 호 목차</span></h2></FadeIn>
+    <ol className="jk-contents-list">
+      {features.map((feature, index) => <li key={feature.id}>
+        <FadeIn delay={index * .1} y={30}>
+          <a className="jk-contents-link" href={magazineUrl(feature.id)}>
+            <span className="jk-contents-no" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+            <div className="jk-contents-copy"><span>{feature.label}</span><h3>{feature.title}</h3><p>{feature.subtitle}</p></div>
+            <span className="jk-contents-arrow" aria-hidden="true">↗</span>
+          </a>
+        </FadeIn>
+      </li>)}
+    </ol>
   </section>
 }
 
@@ -128,7 +103,7 @@ export default function MagazineLanding() {
     <MagazineCover photo={photos.cover} title="피치사이드 매거진" />
     <ShelfSection />
     <About />
-    <Marquee />
+    <Contents />
     <Stories />
   </div>
 }

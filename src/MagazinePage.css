@@ -30,7 +30,8 @@
   overflow-x: clip;
   color-scheme: dark;
 }
-:root.magazine-root { background: #0C0C0C; }
+:root.magazine-root { background: #0C0C0C; scrollbar-width: none; scrollbar-gutter: auto; }
+:root.magazine-root::-webkit-scrollbar { display: none; width: 0; height: 0; }
 :root.magazine-root.magazine-light { background: #fff; }
 .magazine.is-detail {
   --mag-paper: #fff;

@@ -13,8 +13,8 @@
 /* 공통 등장 효과 */
 .mag-fade { opacity: 0; transform: translate3d(var(--fade-x), var(--fade-y), 0); transition: opacity .7s cubic-bezier(.25,.1,.25,1) var(--fade-delay), transform .7s cubic-bezier(.25,.1,.25,1) var(--fade-delay); }
 .mag-fade[data-visible=true] { opacity: 1; transform: none; }
-.mag-fill [aria-hidden] > span { opacity: .2; transition: opacity .35s ease; }
-.mag-fill[data-filled=true] [aria-hidden] > span { opacity: 1; }
+.mag-fade:focus-within { opacity: 1; transform: none; }
+.mag-fill [aria-hidden] > span { opacity: clamp(.2, calc(.2 + (var(--fill-progress, 0) * var(--char-count) - var(--char-index)) * .8), 1); transition: opacity .15s ease; }
 
 /* 상단 메뉴 */
 .jk-top { position: relative; z-index: 2; }
@@ -23,12 +23,7 @@
 .jk-shelf-heading { text-align: center; font: 500 16px/1.4 Kanit, Pretendard, sans-serif; }
 .jk-shelf-heading > span:not(.sr-only) { font-weight: 300; }
 .jk-shelf .mag-shelf-section { --H: min(50svh, 33vw); --shelf-bg: var(--jk-bg); --shelf-ink: var(--jk-ink); --shelf-sub: var(--jk-sub); --shelf-muted: var(--jk-muted); --shelf-accent: var(--jk-accent); --shelf-on: #fff; --shelf-rule: rgba(215,226,234,.5); padding-block: 48px 32px; }
-.jk-nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: var(--mag-width); margin-inline: auto; padding: 20px 0; color: inherit; font: 400 13px/1 Kanit, Pretendard, sans-serif; }
-.jk-masthead { gap: 5px; font-size: 16px; font-weight: 500; white-space: nowrap; }
-.jk-masthead span { font-weight: 300; }
-.jk-nav-articles { gap: 4px; }
-.jk-nav a { min-height: 44px; display: inline-flex; align-items: center; padding: 10px 18px; border: 1px solid color-mix(in srgb, currentColor 40%, transparent); border-radius: 999px; white-space: nowrap; transition: background-color .2s; }
-.jk-nav a:hover { background: color-mix(in srgb, currentColor 12%, transparent); }
+.jk-nav { display: flex; justify-content: flex-end; align-items: center; width: var(--mag-width); margin-inline: auto; padding: 20px 0; color: inherit; font: 400 13px/1 Kanit, Pretendard, sans-serif; }
 .jk-top.is-overlay a:focus-visible { outline-color: #fff; }
 
 /* 메인과 상세는 같은 사진 표지에서 시작하고 다음 지면으로 자연스럽게 스크롤한다. */
@@ -52,29 +47,21 @@
 }
 @media (max-width: 767px) {
   .jk-nav { padding-block: 16px; font-size: 12px; }
-  .jk-masthead { font-size: 14px; }
-  .jk-nav a { padding-inline: 12px; }
   .mag-cover { padding-bottom: 32px; }
   .mag-cover-title { font-size: clamp(32px, 7vw, 54px); }
   .jk-shelf { min-height: 85svh; padding-block: 40px; }
 }
 
-/* 2. 사진 마키: 소개 버튼 바로 아래에서 자동으로 흐른다. 마우스를 올리면 잠시 멈춘다. */
-.jk-marquee { display: flex; flex-direction: column; gap: 12px; width: var(--mag-width); margin: 0 auto 2.5rem; overflow: hidden; border-radius: 16px; }
-.mag-auto-track { display: flex; width: max-content; will-change: transform; animation: mag-row-left var(--row-duration) linear infinite; }
-.mag-auto-track[data-direction=right] { animation-name: mag-row-right; }
-.mag-auto-set { display: flex; gap: 12px; padding-right: 12px; }
-.jk-marquee:hover .mag-auto-track { animation-play-state: paused; }
-@keyframes mag-row-left { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
-@keyframes mag-row-right { from { transform: translate3d(-50%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
-.jk-tile { flex: none; width: 420px; height: 270px; overflow: hidden; border-radius: 16px; background: #1A1C1F; }
-.jk-tile img { max-width: none; width: 100%; height: 100%; object-fit: cover; }
-.jk-tile-text { display: flex; flex-direction: column; justify-content: space-between; padding: 28px; background: var(--tile-bg); color: var(--tile-fg); }
-.jk-tile-text small { font: 500 11px/1 Kanit, Pretendard, sans-serif; letter-spacing: .2em; }
-.jk-tile-text strong { font: 400 32px/1.45 var(--mag-serif); letter-spacing: -.03em; word-break: keep-all; }
-.jk-tile-text > span { font: 400 18px/1 'Iowan Old Style', Georgia, serif; letter-spacing: -.02em; }
+/* 1. 큰 제목과 어두운 사진 배경. 상세 표지에는 적용하지 않는다. */
+.mag-cover.is-editorial-hero { display: block; padding: 120px var(--mag-gutter) 40px; }
+.is-editorial-hero::before { background: linear-gradient(180deg, rgba(0,0,0,.64), rgba(0,0,0,.48) 42%, rgba(0,0,0,.76)); }
+.is-editorial-hero .jk-nav { width: 100%; padding-inline: var(--mag-gutter); }
+.jk-hero-heading { position: relative; }
+.is-editorial-hero .jk-hero-title { font: 900 clamp(52px, 16.8vw, 360px)/.9 Kanit, sans-serif; letter-spacing: .02em; white-space: nowrap; text-wrap: nowrap; animation: none; background: none; color: var(--jk-sub); -webkit-text-fill-color: currentColor; }
+.jk-hero-letter { display: inline-block; cursor: pointer; }
+.jk-hero-letter > span { display: inline-block; transform-origin: center bottom; pointer-events: none; background: linear-gradient(180deg, #646973 0%, #BBCCD7 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 
-/* 1. 소개 */
+/* 3. 소개 */
 .jk-about { position: relative; min-height: calc(100svh - 120px); display: flex; align-items: center; justify-content: center; width: var(--mag-width); margin-inline: auto; padding: 3rem 0 4rem; }
 .jk-about-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 4rem; }
 .jk-about-copy { display: flex; flex-direction: column; align-items: center; gap: 2.5rem; }
@@ -85,25 +72,26 @@
 .jk-deco-bl { bottom: 8%; left: 3%; width: 100px; }
 .jk-deco-tr { top: 4%; right: 0; width: 120px; }
 .jk-deco-br { bottom: 8%; right: 3%; width: 130px; }
-/* 제목 그라데이션과 같은 스틸 톤. 채움과 테두리를 각각 padding-box·border-box 그라데이션으로 그려
-   왼쪽 끝에서 어두운 채움이 반투명 테두리 밑으로 비쳐 색이 끊겨 보이지 않게 한다.
-   호버하면 채움 그라데이션이 밝은 쪽으로 흐르고 은은한 빛이 생긴다. */
-.jk-contact { display: inline-flex; align-items: center; justify-content: center; padding: .75rem 2rem; border: 1px solid transparent; border-radius: 999px;
-  background:
-    linear-gradient(110deg, #1C2128 0%, #272E37 28%, #3F4955 52%, #6A7A89 74%, #9FB0BE 90%, #C3D2DC 100%) padding-box,
-    linear-gradient(110deg, rgba(215,226,234,.6) 0%, rgba(215,226,234,.28) 50%, rgba(215,226,234,.6) 100%) border-box;
-  background-size: 240% 100%, 100% 100%;
-  background-position: 0% 50%, 0 0;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-  color: #F2F6F9; font: 500 .75rem/1.4 Kanit, Pretendard, sans-serif; letter-spacing: .1em; text-transform: uppercase; text-shadow: 0 1px 2px rgba(0,0,0,.4);
-  transition: background-position .8s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease; }
-@media (hover: hover) { .jk-contact:hover { background-position: 62% 50%, 0 0; box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 0 0 1px rgba(215,226,234,.35), 0 14px 40px -14px rgba(187,204,215,.6); } }
+.jk-contact { --seed-color-bg-brand-solid: #E4E5E7; --seed-color-bg-brand-solid-pressed: #CED0D4; --seed-color-fg-on-brand-solid: #242629; font-family: var(--seed-font-family); }
 .jk-contact:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 
 .jk-shelf .mag-shelf-row { width: 100%; }
 
-/* 4. 이야기 카드 */
-.jk-projects { position: relative; z-index: 10; padding: 5rem 0 6rem; border-radius: 40px 40px 0 0; background: var(--jk-bg); }
+/* 4. 이번 호 목차: 흰 지면과 큰 번호로 구분한다. */
+.jk-contents { --mag-ink: #0C0C0C; position: relative; padding: 5rem var(--mag-gutter) 8rem; border-radius: 40px 40px 0 0; background: #fff; color: #0C0C0C; color-scheme: light; }
+.jk-contents .jk-heading { margin-bottom: 3rem; }
+.jk-contents-list { max-width: 1024px; margin: 0 auto; padding: 0; list-style: none; }
+.jk-contents-list > li + li { border-top: 1px solid #0002; }
+.jk-contents-link { display: grid; grid-template-columns: minmax(72px, .3fr) minmax(0, 1fr) 44px; align-items: center; gap: clamp(16px, 4vw, 64px); padding-block: 2rem; color: inherit; }
+.jk-contents-no { font: 900 clamp(3rem, 10vw, 140px)/1 Kanit, sans-serif; letter-spacing: -.04em; }
+.jk-contents-copy > span { font: 400 11px/1.4 Kanit, sans-serif; letter-spacing: .12em; color: #595959; }
+.jk-contents-copy h3 { margin-top: .5rem; font: 700 clamp(1.25rem, 3vw, 2.5rem)/1.3 Pretendard, sans-serif; letter-spacing: -.04em; word-break: keep-all; }
+.jk-contents-copy p { margin-top: .75rem; font: 400 clamp(.875rem, 1.4vw, 1.125rem)/1.6 Pretendard, sans-serif; color: #595959; word-break: keep-all; }
+.jk-contents-arrow { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid #0003; border-radius: 50%; font-size: 24px; transition: background-color .2s, color .2s; }
+.jk-contents-link:hover .jk-contents-arrow { background: #0C0C0C; color: #fff; }
+
+/* 5. 이야기 카드 */
+.jk-projects { position: relative; z-index: 10; margin-top: -40px; padding: 5rem 0 6rem; border-radius: 40px 40px 0 0; background: var(--jk-bg); }
 .jk-projects .jk-heading { margin-bottom: 4rem; }
 .mag-stack { width: var(--mag-width); margin: 0 auto; display: flex; flex-direction: column; row-gap: 0px; }
 .mag-stack-item { position: sticky; top: calc(6rem + var(--stack-index) * 28px); height: 85vh; }
@@ -133,8 +121,9 @@
   .jk-deco-bl { left: 6%; width: 140px; }
   .jk-deco-tr { width: 160px; }
   .jk-deco-br { right: 6%; width: 170px; }
-  .jk-contact { padding: .875rem 2.5rem; font-size: .875rem; }
-  .jk-projects { border-radius: 50px 50px 0 0; }
+  .jk-contents { padding-block: 6rem 9rem; border-radius: 50px 50px 0 0; }
+  .jk-contents-link { padding-block: 2.5rem; }
+  .jk-projects { margin-top: -48px; border-radius: 50px 50px 0 0; }
   .jk-card { padding: 1.5rem; border-radius: 50px; }
   .jk-ghost { padding: .875rem 2.5rem; font-size: 1rem; }
   .jk-card-grid img { border-radius: 50px; }
@@ -147,14 +136,24 @@
   .jk-deco-bl { left: 10%; width: 180px; }
   .jk-deco-tr { width: 210px; }
   .jk-deco-br { right: 10%; width: 220px; }
-  .jk-contact { padding: 1rem 3rem; font-size: 1rem; }
-  .jk-projects { border-radius: 60px 60px 0 0; }
+  .jk-contents { padding-block: 7rem 10rem; border-radius: 60px 60px 0 0; }
+  .jk-contents .jk-heading { margin-bottom: 4rem; }
+  .jk-projects { margin-top: -56px; border-radius: 60px 60px 0 0; }
   .mag-stack-item { top: calc(8rem + var(--stack-index) * 28px); }
   .jk-card { padding: 2rem; border-radius: 60px; }
   .jk-card-grid img { border-radius: 60px; }
 }
 @media (max-width: 640px) {
   .jk-shelf .mag-shelf-section { --H: min(64vw, 42svh); }
-  .jk-tile-text strong { font-size: 28px; }
+  .mag-cover.is-editorial-hero { padding-block: 120px 32px; }
+  .jk-contents-link { grid-template-columns: 54px minmax(0, 1fr) 32px; gap: 16px; }
+  .jk-contents-arrow { width: 32px; height: 32px; font-size: 20px; }
   .jk-card-top { padding: .25rem .25rem 0; }
+}
+@media (max-width: 359px) {
+  .jk-contents-link { grid-template-columns: 46px minmax(0, 1fr); gap: 14px; }
+  .jk-contents-arrow { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mag-fill [aria-hidden] > span { opacity: 1; transition: none; }
 }
