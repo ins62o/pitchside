@@ -24,6 +24,8 @@
 .jk-shelf-heading > span:not(.sr-only) { font-weight: 300; }
 .jk-shelf .mag-shelf-section { --H: min(50svh, 33vw); --shelf-bg: var(--jk-bg); --shelf-ink: var(--jk-ink); --shelf-sub: var(--jk-sub); --shelf-muted: var(--jk-muted); --shelf-accent: var(--jk-accent); --shelf-on: #fff; --shelf-rule: rgba(215,226,234,.5); padding-block: 48px 32px; }
 .jk-nav { display: flex; justify-content: flex-end; align-items: center; width: var(--mag-width); margin-inline: auto; padding: 20px 0; color: inherit; font: 400 13px/1 Kanit, Pretendard, sans-serif; }
+.jk-nav-articles { color: #fff; font-family: var(--seed-font-family); text-shadow: 0 1px 6px #0008; }
+.jk-nav-articles:focus-visible .header-magazine-label::after { transform: scaleX(1); }
 .jk-top.is-overlay a:focus-visible { outline-color: #fff; }
 
 /* 메인과 상세는 같은 사진 표지에서 시작하고 다음 지면으로 자연스럽게 스크롤한다. */
@@ -57,7 +59,9 @@
 .is-editorial-hero::before { background: linear-gradient(180deg, rgba(0,0,0,.64), rgba(0,0,0,.48) 42%, rgba(0,0,0,.76)); }
 .is-editorial-hero .jk-nav { width: 100%; padding-inline: var(--mag-gutter); }
 .jk-hero-heading { position: relative; }
-.is-editorial-hero .jk-hero-title { font: 900 clamp(52px, 16.8vw, 360px)/.9 Kanit, sans-serif; letter-spacing: .02em; white-space: nowrap; text-wrap: nowrap; animation: none; background: none; color: var(--jk-sub); -webkit-text-fill-color: currentColor; }
+.is-editorial-hero .jk-hero-title { width: fit-content; max-width: 100%; font: 900 clamp(52px, 16.8vw, 360px)/.9 Kanit, sans-serif; letter-spacing: .02em; white-space: nowrap; text-wrap: nowrap; animation: none; background: none; color: var(--jk-sub); -webkit-text-fill-color: currentColor; }
+.jk-hero-title-line { display: block; }
+.jk-hero-title-line + .jk-hero-title-line { margin-top: clamp(8px, 1.5vw, 24px); font-size: .78em; text-align: right; }
 .jk-hero-letter { display: inline-block; cursor: pointer; }
 .jk-hero-letter > span { display: inline-block; transform-origin: center bottom; pointer-events: none; background: linear-gradient(180deg, #646973 0%, #BBCCD7 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 

@@ -20,7 +20,7 @@ export function MagazineTopNav({ overlay = false }: { overlay?: boolean }) {
   return <header className={`jk-top${overlay ? ' is-overlay' : ''}`}>
     <FadeIn y={-20}>
       <nav className="jk-nav" aria-label="팬 매거진 메뉴">
-        <ActionButton asChild className="ui-button jk-contact" variant="brandSolid" size="medium"><a href="#/">Articles <span aria-hidden="true">↗</span></a></ActionButton>
+        <a className="header-magazine jk-nav-articles" href="#/"><span className="header-magazine-label">Articles <span aria-hidden="true">↗</span></span></a>
       </nav>
     </FadeIn>
   </header>
@@ -32,7 +32,12 @@ export function MagazineCover({ photo, title, page = 'home' }: { photo: Photo; t
   return <section ref={cover} className={`mag-cover${page === 'home' ? ' is-scroll-cover is-editorial-hero' : ''}`} aria-label={`${title} 표지`}>
     <div className="mag-cover-image">{failed ? <div className="mag-cover-placeholder" role="img" aria-label="표지 사진 준비 중">pitchside.</div> : <img src={photo.src} alt={photo.alt} fetchPriority="high" onError={() => setFailed(true)} />}</div>
     {page === 'home' && <MagazineTopNav overlay />}
-    {page === 'home' ? <FadeIn className="jk-hero-heading" delay={.15} y={40}><h1 className="hero-heading mag-cover-title jk-hero-title" aria-label={title}><BounceLetters text="PITCHSIDE" /></h1></FadeIn> : <h1 className="mag-cover-title">{title}</h1>}
+    {page === 'home' ? <FadeIn className="jk-hero-heading" delay={.15} y={40}>
+      <h1 className="hero-heading mag-cover-title jk-hero-title" aria-label={title}>
+        <span className="jk-hero-title-line"><BounceLetters text="PITCHSIDE" /></span>
+        <span className="jk-hero-title-line"><BounceLetters text="MAGAZINE" /></span>
+      </h1>
+    </FadeIn> : <h1 className="mag-cover-title">{title}</h1>}
   </section>
 }
 
